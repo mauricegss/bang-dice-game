@@ -1,0 +1,138 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Rye&family=Inter:wght@400;500;700&display=swap');
+
+:root {
+  --wood-dark:    #2a1206;
+  --wood-mid:     #5c2a0a;
+  --wood-light:   #8b4513;
+  --felt-dark:    #0d3d0d;
+  --felt-mid:     #1a5c1a;
+  --felt-light:   #2a7a2a;
+  --gold:         #d4a017;
+  --gold-lt:      #f0c842;
+  --parchment:    #f5e6c8;
+  --red-dark:     #6b0a0a;
+  --red-mid:      #8b1a1a;
+  --red-lt:       #c22a2a;
+  --ink:          #1a0805;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0; padding: 0;
+  background: #0a0603;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  height: 100vh; width: 100vw;
+  color: var(--parchment);
+}
+#root { width: 100%; height: 100%; }
+
+.font-western { font-family: 'Rye', serif !important; }
+
+/* ── Animations ── */
+@keyframes flicker {
+  0%,92%,94%,98%,100% { opacity:1; }
+  93%,97% { opacity:0.6; }
+  95% { opacity:0.15; }
+}
+@keyframes glow-gold {
+  0%,100% { box-shadow: 0 0 10px 2px rgba(212,160,23,0.5); }
+  50%      { box-shadow: 0 0 22px 6px rgba(240,200,66,0.8); }
+}
+@keyframes glow-green {
+  0%,100% { box-shadow: 0 0 10px 2px rgba(34,180,34,0.5); }
+  50%      { box-shadow: 0 0 22px 6px rgba(60,220,60,0.8); }
+}
+@keyframes damage-flash {
+  0%   { background: rgba(200,0,0,0); }
+  20%  { background: rgba(200,0,0,0.45); }
+  100% { background: rgba(200,0,0,0); }
+}
+@keyframes slide-up {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes bounce-in {
+  0%   { transform: scale(0.7); opacity:0; }
+  60%  { transform: scale(1.08); opacity:1; }
+  100% { transform: scale(1); }
+}
+@keyframes spin-fast {
+  from { transform: rotateX(0deg) rotateY(0deg); }
+  to   { transform: rotateX(720deg) rotateY(540deg); }
+}
+
+.flicker    { animation: flicker 7s infinite; }
+.glow-gold  { animation: glow-gold 2s ease-in-out infinite; }
+.glow-green { animation: glow-green 1s ease-in-out infinite; }
+.slide-up   { animation: slide-up 0.35s ease-out; }
+.bounce-in  { animation: bounce-in 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.damage-vfx { animation: damage-flash 0.5s ease-out; }
+
+/* ── CSS 3D Dice ── */
+.dice-scene-container {
+  perspective: 400px;
+  width: 58px;
+  height: 58px;
+}
+.dice-cube-body {
+  width: 58px;
+  height: 58px;
+  position: relative;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+/* HP pips */
+.hp-pip {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #cc1111;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  display: inline-block;
+}
+.hp-pip.empty {
+  background: transparent;
+  border: 1.5px solid #888;
+}
+
+/* Arrow token */
+.arrow-token {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--wood-mid); color: var(--gold);
+  border-radius: 3px; font-size: 0.6rem;
+  width: 16px; height: 16px; font-weight:900;
+}
+
+/* Player card */
+.player-card {
+  background: linear-gradient(160deg, #f5e6c8, #e8d09a);
+  border: 2px solid #9b6a2a;
+  border-radius: 12px;
+  cursor: default;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  position: relative;
+  overflow: visible;
+}
+.player-card.is-current {
+  border-color: var(--gold);
+  transform: scale(1.05);
+  animation: glow-gold 2s ease-in-out infinite;
+}
+.player-card.is-targetable {
+  border-color: #22cc22;
+  cursor: pointer;
+  animation: glow-green 1s ease-in-out infinite;
+}
+.player-card.is-targetable:hover { transform: scale(1.08); }
+.player-card.is-dead {
+  filter: grayscale(0.9) brightness(0.5);
+  border-color: #444;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+::-webkit-scrollbar-thumb { background: var(--wood-mid); border-radius: 4px; }
