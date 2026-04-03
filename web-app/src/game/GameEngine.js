@@ -189,7 +189,7 @@ export class GameEngine {
     this.resolutionQueue      = [];
     this.pendingAction        = SpecialAction.None;
     this.abilityUsedThisTurn  = false;
-    this.damagedThisTick      = new Set();
+    this.damagedThisTick      = [];
 
     // Reset all dice
     this.dice = Array(5).fill(null).map(() => ({
@@ -738,5 +738,26 @@ export class GameEngine {
       logs:             [...this.logs],
       damagedThisTick:  [...this.damagedThisTick],
     };
+  }
+
+  /** Restore engine properties from a plain JSON state object */
+  hydrate(state) {
+    if (!state) return;
+    this.totalPlayers     = state.players.length;
+    this.players          = state.players.map(p => ({ ...p }));
+    this.currentPlayerIdx = state.currentPlayerIdx;
+    this.rollsLeft        = state.rollsLeft;
+    this.maxRolls         = state.maxRolls;
+    this.arrowsInCenter   = state.arrowsInCenter;
+    this.dice             = state.dice.map(d => ({ ...d }));
+    this.gameOver         = state.gameOver;
+    this.winner           = state.winner;
+    this.phase            = state.phase;
+    this.pendingType      = state.pendingType;
+    this.pendingShots     = state.pendingShots;
+    this.pendingBeers     = state.pendingBeers;
+    this.pendingAction    = state.pendingAction;
+    this.logs             = [...(state.logs || [])];
+    this.damagedThisTick  = [...(state.damagedThisTick || [])];
   }
 }

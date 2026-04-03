@@ -94,13 +94,16 @@ const PlayerCard = ({
           P{id + 1}
         </div>
 
-        {/* Character name */}
+        {/* Character/Player name */}
         <div style={{
-          fontFamily: 'Rye,serif', fontSize: '0.68rem',
-          color: '#3d1c0a', marginTop: 8, marginBottom: 3, lineHeight: 1.2,
-          paddingRight: 12,
+          fontFamily: 'Rye,serif', fontSize: '0.72rem',
+          color: '#3d1c0a', marginTop: 8, marginBottom: 1, lineHeight: 1.2,
+          paddingRight: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
         }}>
-          {charLabel}
+          {player.name || charLabel}
+        </div>
+        <div style={{ fontSize: '0.55rem', color: '#9b6a2a', marginBottom: 4, fontFamily: 'serif', fontStyle: 'italic' }}>
+          {player.name ? charLabel : ''}
         </div>
 
         {/* Role badge */}
