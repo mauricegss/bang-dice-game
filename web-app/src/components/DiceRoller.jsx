@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Target, 
+  Beer as BeerIcon, 
+  Zap, 
+  Flame, 
+  MoveUpRight as ArrowIcon,
+} from 'lucide-react';
 import { DiceFace, DiceState } from '../game/GameEngine';
 
 // ── Face config per face type ────────────────────────────────────────────────
 const FACE = {
-  [DiceFace.Arrow]:    { emoji: '➵', bg: '#f5e8c0', border: '#c8990a' },
-  [DiceFace.Dynamite]: { emoji: '💥', bg: '#ffe0e0', border: '#cc0000' },
-  [DiceFace.Shoot1]:   { emoji: '🎯', bg: '#eafff0', border: '#229944', sub: '×1' },
-  [DiceFace.Shoot2]:   { emoji: '🎯', bg: '#c8f5d8', border: '#116633', sub: '×2' },
-  [DiceFace.Beer]:     { emoji: '🍺', bg: '#fff5c0', border: '#cc9900' },
-  [DiceFace.Gatling]:  { emoji: '🔫', bg: '#e8eaff', border: '#3344cc' },
+  [DiceFace.Arrow]:    { icon: ArrowIcon, bg: '#f5e8c0', border: '#c8990a' },
+  [DiceFace.Dynamite]: { icon: Flame, bg: '#ffe0e0', border: '#cc0000' },
+  [DiceFace.Shoot1]:   { icon: Target, bg: '#eafff0', border: '#229944' },
+  [DiceFace.Shoot2]:   { icon: Target, bg: '#c8f5d8', border: '#116633' },
+  [DiceFace.Beer]:     { icon: BeerIcon, bg: '#fff5c0', border: '#cc9900' },
+  [DiceFace.Gatling]:  { icon: Zap, bg: '#e8eaff', border: '#3344cc' },
 };
 
 // Rotate the cube body so that face appears in FRONT (facing viewer)
@@ -123,29 +130,31 @@ const Die3D = ({ die, index, size = 60, onToggleHold, canHold, isRolling }) => {
         }}>
           {/* FRONT — Arrow */}
           <div style={{ ...faceStyle(FACE[DiceFace.Arrow]), transform: `translateZ(${half}px)` }}>
-            {isUnrolled ? <span style={{ opacity: 0.3, fontSize: size * 0.5 }}>?</span> : FACE[DiceFace.Arrow].emoji}
+            {isUnrolled ? <span style={{ opacity: 0.3, fontSize: size * 0.5 }}>?</span> : <ArrowIcon size={size * 0.6} color="#7b3d14" />}
           </div>
           {/* BACK — Dynamite */}
           <div style={{ ...faceStyle(FACE[DiceFace.Dynamite]), transform: `rotateY(180deg) translateZ(${half}px)` }}>
-            {FACE[DiceFace.Dynamite].emoji}
+            <Flame size={size * 0.6} color="#cc0000" />
           </div>
           {/* RIGHT — Shoot1 */}
           <div style={{ ...faceStyle(FACE[DiceFace.Shoot1]), transform: `rotateY(90deg) translateZ(${half}px)` }}>
-            {FACE[DiceFace.Shoot1].emoji}
+            <Target size={size * 0.6} color="#229944" />
             <span style={{ position: 'absolute', bottom: 4, right: 4, fontSize: size * 0.17, fontWeight: 900, color: '#116633', background: 'rgba(255,255,255,0.7)', borderRadius: 3, padding: '0 2px' }}>×1</span>
           </div>
           {/* LEFT — Shoot2 */}
           <div style={{ ...faceStyle(FACE[DiceFace.Shoot2]), transform: `rotateY(-90deg) translateZ(${half}px)` }}>
-            {FACE[DiceFace.Shoot2].emoji}
+            <div style={{ position: 'relative' }}>
+              <Target size={size * 0.6} color="#116633" />
+            </div>
             <span style={{ position: 'absolute', bottom: 4, right: 4, fontSize: size * 0.17, fontWeight: 900, color: '#116633', background: 'rgba(255,255,255,0.7)', borderRadius: 3, padding: '0 2px' }}>×2</span>
           </div>
           {/* TOP — Beer */}
           <div style={{ ...faceStyle(FACE[DiceFace.Beer]), transform: `rotateX(90deg) translateZ(${half}px)` }}>
-            {FACE[DiceFace.Beer].emoji}
+            <BeerIcon size={size * 0.6} color="#cc9900" />
           </div>
           {/* BOTTOM — Gatling */}
           <div style={{ ...faceStyle(FACE[DiceFace.Gatling]), transform: `rotateX(-90deg) translateZ(${half}px)` }}>
-            {FACE[DiceFace.Gatling].emoji}
+            <Zap size={size * 0.6} color="#3344cc" />
           </div>
         </div>
       </div>

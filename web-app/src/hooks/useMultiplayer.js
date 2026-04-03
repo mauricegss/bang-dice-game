@@ -120,6 +120,34 @@ export function useMultiplayer() {
     setLoading(false);
   };
 
+  // Leave Room & Cleanup
+  const leaveRoom = useCallback(async () => {
+    if (!room) return;
+    const updatedPlayers = room.players.filter(p => p.id !== user.id);
+    
+    if (updatedPlayers.length === 0) {
+      // Last person left, delete the room
+      await supabase.from('lobbies').delete().eq('code', room.code);
+    } else {
+      // Update players list and pass host if needed
+      const newHostId = isHost ? updatedPlayers[0].id : room.host_id;
+      await supabase.from('lobbies').update({ 
+        players: updatedPlayers,
+        host_id: newHostId
+      }).eq('code', room.code);
+    }
+    setRoom(null);
+    setGameState(null);
+    setIsHost(false);
+  }, [room, user.id, isHost]);
+
+  // Handle window close
+  useEffect(() => {
+    const handleUnload = () => { if (room) leaveRoom(); };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [room, leaveRoom]);
+
   // Start Game (Host only)
   const startGame = async () => {
     if (!isHost || !room) return;
@@ -206,6 +234,7 @@ export function useMultiplayer() {
     createRoom,
     joinRoom,
     startGame,
+    leaveRoom,
     performAction,
     engine: engineRef.current,
   };

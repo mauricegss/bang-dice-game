@@ -112,7 +112,7 @@ const MainMenu = ({ onJoin, onCreate, user, loading, error }) => {
           </div>
         )}
 
-        <div style={{ marginTop: 32, color: '#7b3d14', fontSize: '0.65rem', lineHeight: 1.6 }}>
+        <div style={{ marginTop: 24, color: '#7b3d14', fontSize: '0.65rem', lineHeight: 1.6 }}>
           © 2026 Bang! Multiplayer Online • Suporte via Supabase
         </div>
       </div>

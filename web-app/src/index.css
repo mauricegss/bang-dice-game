@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Rye&family=Inter:wght@400;500;700&display=swap');
 
 :root {
   --wood-dark:    #2a1206;
@@ -58,10 +57,6 @@ body {
   0%   { transform: scale(0.7); opacity:0; }
   60%  { transform: scale(1.08); opacity:1; }
   100% { transform: scale(1); }
-}
-@keyframes spin-fast {
-  from { transform: rotateX(0deg) rotateY(0deg); }
-  to   { transform: rotateX(720deg) rotateY(540deg); }
 }
 
 .flicker    { animation: flicker 7s infinite; }

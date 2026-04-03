@@ -1,8 +1,8 @@
 import React from 'react';
 
-const LobbyScreen = ({ room, user, isHost, onStart, loading, error }) => {
+const LobbyScreen = ({ room, user, isHost, onStart, onLeave, loading, error }) => {
   const players = room?.players || [];
-  const canStart = players.length >= 4;
+  const canStart = players.length >= 2; // Reduzido para 2 para facilitar testes de desenvolvimento
 
   return (
     <div style={{
@@ -58,50 +58,63 @@ const LobbyScreen = ({ room, user, isHost, onStart, loading, error }) => {
                     background: '#d4a017', color: '#1a0805', borderRadius: 4,
                     padding: '2px 8px', fontSize: '0.55rem', fontFamily: 'Rye,serif'
                   }}>
-                    XERIFE
+                    ANFITRIÃO
                   </span>
                 )}
               </div>
             ))}
 
-            {players.length < 4 && (
+            {players.length < 2 && (
               <div style={{
                 textAlign: 'center', padding: '12px', color: '#7b3d14', fontSize: '0.75rem',
                 border: '1px dashed #7b3d14', borderRadius: 12, marginTop: 4,
               }}>
-                Mínimo 4 jogadores para iniciar...
+                Aguardando outro jogador...
               </div>
             )}
           </div>
         </div>
 
-        {isHost ? (
-          <button
-            onClick={onStart}
-            disabled={!canStart || loading}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {isHost ? (
+            <button
+              onClick={onStart}
+              disabled={!canStart || loading}
+              style={{
+                width: '100%', background: 'linear-gradient(135deg,#8b1a1a,#c22a2a)', color: '#fff',
+                border: '2px solid #5a0a0a', borderRadius: 12, padding: '16px',
+                fontFamily: 'Rye,serif', fontSize: '1.25rem', cursor: 'pointer',
+                boxShadow: '0 6px 24px rgba(139,26,26,0.5)',
+                opacity: (!canStart || loading) ? 0.6 : 1,
+                transition: 'transform 0.1s',
+              }}
+              onMouseDown={(e) => !loading && canStart && (e.target.style.transform = 'scale(0.98)')}
+              onMouseUp={(e) => !loading && canStart && (e.target.style.transform = 'scale(1)')}
+            >
+              {loading ? 'INICIANDO...' : '🔫 COMEÇAR PARTIDA!'}
+            </button>
+          ) : (
+            <div style={{ padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: 12, border: '1px solid #3d1c0a' }}>
+              <div style={{ color: '#c8904a', fontSize: '0.9rem', fontFamily: 'Rye,serif', marginBottom: 4 }}>
+                AGUARDANDO INÍCIO
+              </div>
+              <div style={{ color: '#7b3d14', fontSize: '0.7rem' }}>
+                O anfitrião iniciará a partida em breve.
+              </div>
+            </div>
+          )}
+
+          <button 
+            onClick={onLeave}
             style={{
-              width: '100%', background: 'linear-gradient(135deg,#8b1a1a,#c22a2a)', color: '#fff',
-              border: '2px solid #5a0a0a', borderRadius: 12, padding: '16px',
-              fontFamily: 'Rye,serif', fontSize: '1.25rem', cursor: 'pointer',
-              boxShadow: '0 6px 24px rgba(139,26,26,0.5)',
-              opacity: (!canStart || loading) ? 0.6 : 1,
-              transition: 'transform 0.1s',
+              width: '100%', background: 'transparent', color: '#7b3d14',
+              border: '1px solid #3d1c0a', borderRadius: 12, padding: '12px',
+              fontFamily: 'Rye,serif', fontSize: '0.8rem', cursor: 'pointer',
             }}
-            onMouseDown={(e) => !loading && canStart && (e.target.style.transform = 'scale(0.98)')}
-            onMouseUp={(e) => !loading && canStart && (e.target.style.transform = 'scale(1)')}
           >
-            {loading ? 'INICIANDO...' : '🔫 COMEÇAR PARTIDA!'}
+            Sair da Sala
           </button>
-        ) : (
-          <div style={{ padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: 12, border: '1px solid #3d1c0a' }}>
-            <div style={{ color: '#c8904a', fontSize: '0.9rem', fontFamily: 'Rye,serif', marginBottom: 4 }}>
-              AGUARDANDO INÍCIO
-            </div>
-            <div style={{ color: '#7b3d14', fontSize: '0.7rem' }}>
-              O hospedeiro iniciará a partida em breve.
-            </div>
-          </div>
-        )}
+        </div>
 
         {error && (
           <div style={{

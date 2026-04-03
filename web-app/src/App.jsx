@@ -16,6 +16,7 @@ function App() {
     createRoom,
     joinRoom,
     startGame,
+    leaveRoom,
     performAction,
     engine
   } = useMultiplayer();
@@ -23,10 +24,10 @@ function App() {
   // Navigation Logic
   if (!room) {
     return (
-      <MainMenu
-        onJoin={joinRoom}
-        onCreate={createRoom}
-        user={user}
+      <MainMenu 
+        onJoin={joinRoom} 
+        onCreate={createRoom} 
+        user={user} 
         loading={loading}
         error={error}
       />
@@ -35,11 +36,12 @@ function App() {
 
   if (room.phase === 'lobby') {
     return (
-      <LobbyScreen
-        room={room}
-        user={user}
-        isHost={isHost}
-        onStart={startGame}
+      <LobbyScreen 
+        room={room} 
+        user={user} 
+        isHost={isHost} 
+        onStart={startGame} 
+        onLeave={leaveRoom}
         loading={loading}
         error={error}
       />
