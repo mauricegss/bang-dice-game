@@ -130,9 +130,9 @@ const SidePanel = ({ players = [], logs = [], currentPlayerIdx }) => {
 
   return (
     <div style={{
-      position: 'fixed', right: 0, top: 0, bottom: 0, width: 240, zIndex: 30,
-      background: 'linear-gradient(180deg, rgba(16,6,2,0.97) 0%, rgba(10,4,2,0.99) 100%)',
-      borderLeft: '2px solid #3d1c0a', display: 'flex', flexDirection: 'column', boxShadow: '-6px 0 30px rgba(0,0,0,0.6)',
+      position: 'fixed', right: 0, top: 0, bottom: 0, width: 320, zIndex: 30,
+      background: 'linear-gradient(180deg, rgba(16,6,2,0.98) 0%, rgba(10,4,2,1) 100%)',
+      borderLeft: '2px solid #3d1c0a', display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 40px rgba(0,0,0,0.7)',
     }}>
       <div style={{ display: 'flex', borderBottom: '1px solid #3d1c0a' }}>
         {['events', 'chars', 'rules'].map(id => (
@@ -153,17 +153,95 @@ const SidePanel = ({ players = [], logs = [], currentPlayerIdx }) => {
         ))}
         {tab === 'chars' && players.map((p, idx) => (
           <div key={idx} style={{ 
-            background: idx === currentPlayerIdx ? 'rgba(212,160,23,0.08)' : 'rgba(255,255,255,0.03)',
-            border: `1px solid ${idx === currentPlayerIdx ? '#d4a017' : '#3d1c0a'}`,
-            borderRadius: 8, padding: '7px', marginBottom: 8, opacity: p.alive ? 1 : 0.4 
+            background: idx === currentPlayerIdx ? 'rgba(212,160,23,0.15)' : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${idx === currentPlayerIdx ? '#f0c842' : '#3d1c0a'}`,
+            borderRadius: 12, padding: '14px', marginBottom: 12, opacity: p.alive ? 1 : 0.5,
+            transition: 'all 0.3s', position: 'relative',
+            boxShadow: idx === currentPlayerIdx ? '0 0 15px rgba(212,160,23,0.1)' : 'none'
           }}>
-            <div style={{ fontFamily: 'Rye,serif', fontSize: '0.62rem', color: '#f0c842' }}>
-              P{idx + 1} — {p.name || charLabel(p.character)}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ fontFamily: 'Rye,serif', fontSize: '0.85rem', color: '#f0c842' }}>
+                {p.name || charLabel(p.character)}
+              </div>
+              <div style={{ fontSize: '0.6rem', background: '#3d1c0a', padding: '3px 8px', borderRadius: 4, color: '#c8904a', border: '1px solid #5c2a0a' }}>
+                 {fmtRole(p.role === Roles.Sheriff || !p.alive || players.length === 3 ? p.role : '???')}
+              </div>
             </div>
-            <div style={{ fontSize: '0.57rem', color: '#7b3d14' }}>{p.alive ? 'Ativo' : 'Fora de Combate'}</div>
+            
+            <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
+               <div style={{ flex: 1, background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: 8 }}>
+                  <div style={{ fontSize: '0.5rem', color: '#7b3d14', marginBottom: 2, letterSpacing: 1 }}>VIDA</div>
+                  <div style={{ fontSize: '0.9rem', color: p.health <= 2 ? '#ff4444' : '#e8d8b8', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: '1rem' }}>❤️</span> {p.health} / {p.maxHealth}
+                  </div>
+               </div>
+               <div style={{ flex: 1, background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: 8 }}>
+                  <div style={{ fontSize: '0.5rem', color: '#7b3d14', marginBottom: 2, letterSpacing: 1 }}>FLECHAS</div>
+                  <div style={{ fontSize: '0.9rem', color: p.arrows > 0 ? '#d4a017' : '#7b3d14', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: '1rem' }}>➵</span> {p.arrows}
+                  </div>
+               </div>
+            </div>
+
+            <div style={{ 
+              padding: '10px', background: 'rgba(212,160,23,0.05)', borderRadius: 8, 
+              fontSize: '0.65rem', color: '#b8a07c', lineHeight: 1.5, borderLeft: '3px solid #d4a01755'
+            }}>
+               <b style={{ color: '#d4a017', display: 'block', marginBottom: 4, fontSize: '0.55rem', letterSpacing: 1 }}>HABILIDADE:</b>
+               {characterAbilities[p.character] || 'Habilidade desconhecida'}
+            </div>
+            {!p.alive && (
+              <div style={{ 
+                position: 'absolute', inset: 0, background: 'rgba(10,4,2,0.6)', 
+                borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                fontSize: '2rem', pointerEvents: 'none', filter: 'grayscale(1)' 
+              }}>💀️</div>
+            )}
+            {idx === currentPlayerIdx && (
+               <div style={{ position: 'absolute', left: -10, top: '50%', transform: 'translateY(-50%)', width: 4, height: '40%', background: '#d4a017', borderRadius: 2 }} />
+            )}
           </div>
         ))}
-        {tab === 'rules' && <div style={{ fontSize: '0.65rem', color: '#c8904a', lineHeight: 1.6 }}>Regras: Role 3x, guarde dados, evite Dinamites. 9 flechas centro = ataque índio. Siga os alvos 1/2.</div>}
+        {tab === 'rules' && (
+          <div style={{ fontSize: '0.68rem', color: '#c8904a', lineHeight: 1.7 }}>
+            <h4 style={{ color: '#f0c842', marginBottom: 8, fontSize: '0.8rem', fontFamily: 'Rye,serif' }}>CÓDIGO DE CONDUTA</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <p>• <b>Dinamites 💥:</b> Ao tirar 3, seu turno acaba imediatamente e você perde 1 HP. Elas não podem ser re-roladas!</p>
+              <p>• <b>Flechas ➵:</b> Se você pegar a última flecha do centro (9ª), todos os jogadores com flechas perdem vida igual ao número de flechas que possuem.</p>
+              <p>• <b>Metralhadora 🔫:</b> Três símbolos de Gatling ativam um ataque devastador contra todos os outros jogadores e removem todas as suas flechas.</p>
+              <p>• <b>Cerveja 🍺:</b> Pode ser usada em você mesmo ou em qualquer aliado. Use com sabedoria para manter o Xerife (ou seus comparsas) vivo!</p>
+            </div>
+            <div style={{ marginTop: 15, padding: '10px', background: 'rgba(212,160,23,0.05)', borderRadius: 8, border: '1px solid rgba(212,160,23,0.1)' }}>
+              <b style={{ color: '#f0c842', fontSize: '0.6rem', letterSpacing: 1 }}>DISTRIBUIÇÃO ({players.length} JOGADORES):</b><br/>
+              <div style={{ fontSize: '0.6rem', marginTop: 4, color: '#e8d8b8' }}>
+                {players.length === 3 ? '1 Assistente, 1 Fora-da-Lei, 1 Renegado (Modo Especial)' :
+                 players.length === 4 ? '1 Xerife, 1 Renegado, 2 Foras-da-Lei' :
+                 players.length === 5 ? '1 Xerife, 1 Renegado, 2 Foras-da-Lei, 1 Assistente' :
+                 players.length === 6 ? '1 Xerife, 1 Renegado, 3 Foras-da-Lei, 1 Assistente' :
+                 players.length === 7 ? '1 Xerife, 1 Renegado, 3 Foras-da-Lei, 2 Assistentes' :
+                 '1 Xerife, 2 Renegados, 3 Foras-da-Lei, 2 Assistentes'}
+              </div>
+            </div>
+
+            <div style={{ marginTop: 15, padding: '10px', background: 'rgba(212,160,23,0.05)', borderRadius: 8, border: '1px solid rgba(212,160,23,0.1)' }}>
+              <b style={{ color: '#f0c842' }}>CONDIÇÕES DE VITÓRIA:</b><br/>
+              <span style={{ fontSize: '0.62rem' }}>
+                {players.length === 3 ? (
+                  <>
+                    <b>Objetivo Circular:</b> Elimine pessoalmente seu alvo específico.<br/>
+                    <b>Duelo:</b> Se seu alvo morrer para outro, seja o único sobrevivente.
+                  </>
+                ) : (
+                  <>
+                    <b>Xerife/Vices:</b> Eliminar todos os Foras-da-Lei e o Renegado.<br/>
+                    <b>Foras-da-Lei:</b> Eliminar o Xerife.<br/>
+                    <b>Renegado:</b> Ser o último sobrevivente (deve matar o Xerife por último).
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
+        )}
         <div ref={logEndRef} />
       </div>
     </div>
@@ -200,7 +278,7 @@ const GameBoard = ({ room, user, gameState, performAction, onExit }) => {
     return () => window.removeEventListener('resize', handle);
   }, []);
 
-  const availW = vp.w - 240; // Side panel
+  const availW = vp.w - 320; // Side panel
   const centerX = availW / 2;
   const centerY = vp.h * 0.40;
   const tableR = Math.min(availW * 0.25, vp.h * 0.25, 220);
@@ -230,8 +308,8 @@ const GameBoard = ({ room, user, gameState, performAction, onExit }) => {
     const count = orderedOpponents.length;
     orderedOpponents.forEach((p, i) => {
       // Map i in count to 270 degree arc across top
-      const start = -Math.PI * 0.75;
-      const end = Math.PI * 0.75;
+      const start = -Math.PI * 0.55;
+      const end = Math.PI * 0.55;
       const angle = count === 1 ? -Math.PI / 2 : start + (i / (count - 1)) * (end - start);
       pos[p.id] = {
         x: Math.cos(angle - Math.PI / 2) * orbitR,
@@ -242,7 +320,10 @@ const GameBoard = ({ room, user, gameState, performAction, onExit }) => {
   }, [orderedOpponents, orbitR]);
 
   // Actions
-  const handleRoll = () => performAction((engine) => engine.requestRoll());
+  const handleRoll = () => {
+    if (gsData.phase !== Phase.Rolling || gsData.rollsLeft <= 0) return;
+    performAction((engine) => engine.roll());
+  };
   const handleToggleHold = (i) => performAction((engine) => engine.toggleHold(i));
   const handleResolve = () => performAction((engine) => engine._beginResolution());
   const handleSelectTarget = (id) => performAction((engine) => engine.selectTarget(id));
@@ -280,7 +361,7 @@ const GameBoard = ({ room, user, gameState, performAction, onExit }) => {
               isCurrentPlayer={gsData.currentPlayerIdx === p.id}
               isTargetable={gsData.validTargets.includes(p.id)}
               onSelect={handleSelectTarget}
-              showRole={p.role === Roles.Sheriff || !p.alive}
+              showRole={p.role === Roles.Sheriff || !p.alive || players.length === 3}
               isDamaged={damagedSet.has(p.id)}
             />
             {gsData.currentPlayerIdx === p.id && <MiniDiceZone dice={gsData.dice} isActive={false} />}
@@ -291,8 +372,18 @@ const GameBoard = ({ room, user, gameState, performAction, onExit }) => {
       {/* ── Local Player HUD ────────────────────────────────────────────── */}
       {!gsData.gameOver && players[localPlayerIdx] && (
         <div style={{ position:'fixed', bottom:16, left: centerX, transform:'translateX(-50%)', zIndex:20, display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
-          <div style={{ color: isMyTurn ? '#f0c842' : '#7b3d14', fontFamily:'Rye,serif', fontSize:'0.75rem', background:'#000c', padding:'5px 15px', borderRadius:20, border: `1px solid ${isMyTurn?'#d4a017':'#3d1c0a'}` }}>
+          <div style={{ color: isMyTurn ? '#f0c842' : '#7b3d14', fontFamily:'Rye,serif', fontSize:'0.75rem', background:'#000c', padding:'5px 15px', borderRadius:20, border: `1px solid ${isMyTurn?'#d4a017':'#3d1c0a'}`, display:'flex', alignItems:'center', gap:10 }}>
             {isMyTurn ? 'SUA VEZ DE AGIR' : `AGUARDANDO TURNO DE ${currentP?.name || 'OUTRO JOGADOR'}`}
+            
+            {isMyTurn && gsData.phase === Phase.Resolving && gsData.pendingType && (
+              <div style={{ display:'flex', alignItems:'center', gap:5, marginLeft: 10, paddingLeft: 10, borderLeft: '1px solid rgba(212,160,23,0.3)' }}>
+                <span style={{ fontSize: '0.6rem', color: '#d4a017', opacity: 0.8 }}>RESOLVENDO:</span>
+                <span style={{ fontSize: '0.7rem', color: '#fff' }}>
+                  {gsData.pendingType === DiceFace.Shoot1 ? '🎯 Alvo 1' : 
+                   gsData.pendingType === DiceFace.Shoot2 ? '🎯 Alvo 2' : gsData.pendingType}
+                </span>
+              </div>
+            )}
           </div>
           
           <div style={{ display:'flex', alignItems:'flex-end', gap:15 }}>
@@ -304,22 +395,35 @@ const GameBoard = ({ room, user, gameState, performAction, onExit }) => {
                 showRole={true}
                 isDamaged={damagedSet.has(localPlayerIdx)}
              />
-             <DiceRoller
-                dice={gsData.dice}
-                onToggleHold={handleToggleHold}
-                onRoll={handleRoll}
-                onResolve={handleResolve}
-                rollsLeft={gsData.rollsLeft}
-                maxRolls={gsData.maxRolls}
-                phase={gsData.phase}
-                disabled={!isMyTurn || gsData.gameOver || gsData.phase === Phase.Resolving}
-             />
+              <DiceRoller
+                 dice={gsData.dice}
+                 onToggleHold={handleToggleHold}
+                 onRoll={handleRoll}
+                 onResolve={handleResolve}
+                 rollsLeft={gsData.rollsLeft}
+                 maxRolls={gsData.maxRolls}
+                 phase={gsData.phase}
+                 disabled={!isMyTurn || gsData.gameOver}
+                 isMyTurn={isMyTurn}
+              />
           </div>
+
+          {isMyTurn && gsData.phase === Phase.Resolving && currentP?.character === 'JaneCalamidade' && (gsData.pendingType === DiceFace.Shoot1 || gsData.pendingType === DiceFace.Shoot2) && (
+            <button onClick={handleUseAbility} style={{ background: gsData.swapRange ? '#d4a017' : '#3d1c0a', color: gsData.swapRange ? '#1a0805' : '#d4a017', border: '1px solid #d4a017', borderRadius: 8, padding: '8px 24px', fontFamily: 'Rye,serif', cursor: 'pointer', boxShadow: '0 4px 10px #000c' }}>
+              🎯 ALTERNAR ALCANCE (D{gsData.swapRange ? '2→1' : '1→2'})
+            </button>
+          )}
 
           {canUseAbility && (
             <button onClick={handleUseAbility} style={{ background: gsData.pendingAction !== SpecialAction.None ? '#8b1a1a' : '#2255cc', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 24px', fontFamily: 'Rye,serif', cursor: 'pointer', boxShadow: '0 4px 10px #000c' }}>
               ⚡ USAR HABILIDADE: {charLabel(currentP.character)}
             </button>
+          )}
+
+          {gsData.players.length === 3 && players[localPlayerIdx]?.alive && (
+            <div style={{ background:'rgba(0,0,0,0.6)', padding:'4px 12px', border:'1px dashed #d4a017', borderRadius:8, fontSize:'0.6rem', color:'#f0c842', animation:'pulse 2s infinite' }}>
+              🎯 OBJETIVO: {gsData.duelMode ? 'ELIMINAR TODOS' : `ELIMINAR ${players[gsData.playerObjectives[localPlayerIdx]]?.name || 'ALVO'}`}
+            </div>
           )}
         </div>
       )}

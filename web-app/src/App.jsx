@@ -1,11 +1,21 @@
 import React from 'react';
+import { Routes, Route, useParams } from 'react-router-dom';
 import { useMultiplayer } from './hooks/useMultiplayer';
+import { useLocalGame } from './hooks/useLocalGame';
 import MainMenu from './components/MainMenu';
 import LobbyScreen from './components/LobbyScreen';
 import GameBoard from './components/GameBoard';
 import './index.css';
 
-function App() {
+function GameContainer() {
+  const { roomCode } = useParams();
+  const [mode, setMode] = React.useState('multiplayer');
+  
+  const multi = useMultiplayer();
+  const local = useLocalGame();
+  
+  const current = mode === 'multiplayer' ? multi : local;
+  
   const {
     user,
     room,
@@ -18,18 +28,19 @@ function App() {
     startGame,
     leaveRoom,
     performAction,
-    engine
-  } = useMultiplayer();
+  } = current;
 
   // Navigation Logic
   if (!room) {
     return (
       <MainMenu 
         onJoin={joinRoom} 
-        onCreate={createRoom} 
+        onCreate={(name) => { setMode('multiplayer'); createRoom(name); }} 
+        onSolo={(name) => { setMode('solo'); local.createRoom(name); }}
         user={user} 
         loading={loading}
         error={error}
+        initialCode={roomCode}
       />
     );
   }
@@ -41,7 +52,7 @@ function App() {
         user={user} 
         isHost={isHost} 
         onStart={startGame} 
-        onLeave={leaveRoom}
+        onLeave={() => { leaveRoom(); setMode('multiplayer'); }}
         loading={loading}
         error={error}
       />
@@ -56,12 +67,28 @@ function App() {
         gameState={gameState}
         performAction={performAction}
         isHost={isHost}
-        onExit={() => window.location.reload()} // simplest way to reset
+        onExit={() => {
+          if (mode === 'solo') {
+            leaveRoom();
+            setMode('multiplayer');
+          } else {
+            window.location.href = '/';
+          }
+        }}
       />
     );
   }
 
   return <div>Carregando...</div>;
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<GameContainer />} />
+      <Route path="/:roomCode" element={<GameContainer />} />
+    </Routes>
+  );
 }
 
 export default App;

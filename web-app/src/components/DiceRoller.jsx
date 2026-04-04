@@ -12,8 +12,8 @@ import { DiceFace, DiceState } from '../game/GameEngine';
 const FACE = {
   [DiceFace.Arrow]:    { icon: ArrowIcon, bg: '#f5e8c0', border: '#c8990a' },
   [DiceFace.Dynamite]: { icon: Flame, bg: '#ffe0e0', border: '#cc0000' },
-  [DiceFace.Shoot1]:   { icon: Target, bg: '#eafff0', border: '#229944' },
-  [DiceFace.Shoot2]:   { icon: Target, bg: '#c8f5d8', border: '#116633' },
+  [DiceFace.Shoot1]:   { icon: Target, bg: '#eafff0', border: '#229944', color: '#229944' },
+  [DiceFace.Shoot2]:   { icon: Target, bg: '#fef0e0', border: '#d45d17', color: '#d45d17' },
   [DiceFace.Beer]:     { icon: BeerIcon, bg: '#fff5c0', border: '#cc9900' },
   [DiceFace.Gatling]:  { icon: Zap, bg: '#e8eaff', border: '#3344cc' },
 };
@@ -136,17 +136,13 @@ const Die3D = ({ die, index, size = 60, onToggleHold, canHold, isRolling }) => {
           <div style={{ ...faceStyle(FACE[DiceFace.Dynamite]), transform: `rotateY(180deg) translateZ(${half}px)` }}>
             <Flame size={size * 0.6} color="#cc0000" />
           </div>
-          {/* RIGHT — Shoot1 */}
           <div style={{ ...faceStyle(FACE[DiceFace.Shoot1]), transform: `rotateY(90deg) translateZ(${half}px)` }}>
             <Target size={size * 0.6} color="#229944" />
-            <span style={{ position: 'absolute', bottom: 4, right: 4, fontSize: size * 0.17, fontWeight: 900, color: '#116633', background: 'rgba(255,255,255,0.7)', borderRadius: 3, padding: '0 2px' }}>×1</span>
+            <span style={{ position: 'absolute', bottom: 4, right: 4, fontSize: size * 0.17, fontWeight: 900, color: '#116633', background: 'rgba(255,255,255,0.85)', borderRadius: 3, padding: '0 2px' }}>×1</span>
           </div>
-          {/* LEFT — Shoot2 */}
           <div style={{ ...faceStyle(FACE[DiceFace.Shoot2]), transform: `rotateY(-90deg) translateZ(${half}px)` }}>
-            <div style={{ position: 'relative' }}>
-              <Target size={size * 0.6} color="#116633" />
-            </div>
-            <span style={{ position: 'absolute', bottom: 4, right: 4, fontSize: size * 0.17, fontWeight: 900, color: '#116633', background: 'rgba(255,255,255,0.7)', borderRadius: 3, padding: '0 2px' }}>×2</span>
+            <Target size={size * 0.6} color="#d45d17" />
+            <span style={{ position: 'absolute', bottom: 4, right: 4, fontSize: size * 0.17, fontWeight: 900, color: '#d45d17', background: 'rgba(255,255,255,0.85)', borderRadius: 3, padding: '0 2px' }}>×2</span>
           </div>
           {/* TOP — Beer */}
           <div style={{ ...faceStyle(FACE[DiceFace.Beer]), transform: `rotateX(90deg) translateZ(${half}px)` }}>
@@ -163,7 +159,7 @@ const Die3D = ({ die, index, size = 60, onToggleHold, canHold, isRolling }) => {
 };
 
 // ── Dice Tray (5 dice + controls) ───────────────────────────────────────────
-const DiceRoller = ({ dice, onToggleHold, onRoll, onResolve, rollsLeft, maxRolls, phase, disabled }) => {
+const DiceRoller = ({ dice, onToggleHold, onRoll, onResolve, rollsLeft, maxRolls, phase, disabled, isMyTurn }) => {
   const [rolling, setRolling] = useState(false);
 
   const canRoll    = phase === 'Rolling' && rollsLeft > 0 && !disabled && !rolling;
@@ -234,6 +230,7 @@ const DiceRoller = ({ dice, onToggleHold, onRoll, onResolve, rollsLeft, maxRolls
           <button
             onClick={handleRoll}
             disabled={!canRoll}
+            className={canRoll && isMyTurn ? 'pulse-gold' : ''}
             style={{
               background: canRoll ? 'linear-gradient(135deg,#d4a017,#f0c842)' : 'rgba(255,255,255,0.07)',
               color: canRoll ? '#1a0805' : '#555',

@@ -105,7 +105,7 @@ const randomFace = () => ALL_FACES[Math.floor(Math.random() * ALL_FACES.length)]
 // ── GameEngine class ──────────────────────────────────────────────────────────
 export class GameEngine {
   constructor(totalPlayers = 4) {
-    this.totalPlayers = Math.max(4, Math.min(8, totalPlayers));
+    this.totalPlayers = Math.max(3, Math.min(8, totalPlayers));
     this._init();
   }
 
@@ -138,6 +138,11 @@ export class GameEngine {
 
     // Damage flash set (player indices that just took damage, for UI)
     this.damagedThisTick = [];
+    
+    // 3-player mode objectives (Personal Target)
+    this.playerObjectives = {}; 
+    this.duelMode         = false;
+    this.swapRange        = false;
 
     this._assignRoles();
     this._assignCharacters();
@@ -148,11 +153,16 @@ export class GameEngine {
 
   // ── Setup ──────────────────────────────────────────────────────────────────
   _assignRoles() {
-    let pool = [Roles.Sheriff, Roles.Renegade, Roles.Outlaw, Roles.Outlaw];
-    if (this.totalPlayers >= 5) pool.push(Roles.Deputy);
-    if (this.totalPlayers >= 6) pool.push(Roles.Outlaw);
-    if (this.totalPlayers >= 7) pool.push(Roles.Deputy);
-    if (this.totalPlayers >= 8) pool.push(Roles.Renegade);
+    let pool = [];
+    if (this.totalPlayers === 3) {
+      pool = [Roles.Deputy, Roles.Outlaw, Roles.Renegade];
+    } else {
+      pool = [Roles.Sheriff, Roles.Renegade, Roles.Outlaw, Roles.Outlaw];
+      if (this.totalPlayers >= 5) pool.push(Roles.Deputy);
+      if (this.totalPlayers >= 6) pool.push(Roles.Outlaw);
+      if (this.totalPlayers >= 7) pool.push(Roles.Deputy);
+      if (this.totalPlayers >= 8) pool.push(Roles.Renegade);
+    }
     pool = shuffle(pool);
 
     for (let i = 0; i < this.totalPlayers; i++) {
@@ -160,7 +170,19 @@ export class GameEngine {
         id: i, role: pool[i], character: null,
         health: 0, maxHealth: 0, arrows: 0, alive: true,
       });
-      if (pool[i] === Roles.Sheriff) this.currentPlayerIdx = i;
+      if (pool[i] === Roles.Sheriff || (this.totalPlayers === 3 && pool[i] === Roles.Deputy)) {
+        this.currentPlayerIdx = i;
+      }
+    }
+    
+    // Set 3-player objectives
+    if (this.totalPlayers === 3) {
+       const depIdx = this.players.findIndex(p => p.role === Roles.Deputy);
+       const outIdx = this.players.findIndex(p => p.role === Roles.Outlaw);
+       const renIdx = this.players.findIndex(p => p.role === Roles.Renegade);
+       this.playerObjectives[depIdx] = renIdx; // Deputy -> Renegade
+       this.playerObjectives[renIdx] = outIdx; // Renegade -> Outlaw
+       this.playerObjectives[outIdx] = depIdx; // Outlaw -> Deputy
     }
   }
 
@@ -190,6 +212,7 @@ export class GameEngine {
     this.pendingAction        = SpecialAction.None;
     this.abilityUsedThisTurn  = false;
     this.damagedThisTick      = [];
+    this.swapRange            = false; // Jane Calamidade toggle
 
     // Reset all dice
     this.dice = Array(5).fill(null).map(() => ({
@@ -201,6 +224,14 @@ export class GameEngine {
   }
 
   // ── Dice Management ────────────────────────────────────────────────────────
+
+  /** Unified Roll Method: Performs the roll and applies results immediately */
+  roll() {
+    const faces = this.requestRoll();
+    if (!faces) return null;
+    this.commitRollResults(faces);
+    return faces;
+  }
 
   /** Called by UI when the Roll button is pressed.
    *  Randomises all Active/Unrolled dice and returns the new faces array
@@ -221,11 +252,10 @@ export class GameEngine {
       }
       newFaces.push(d.face);
     }
-    // Don't commit game logic yet – wait for physics to finish.
     return newFaces;
   }
 
-  /** Called by physics/timer once dice have settled.
+  /** Called internally once dice values are known.
    *  Applies Arrow/Dynamite effects, decrements rollsLeft.
    */
   commitRollResults(settledFaces) {
@@ -240,14 +270,16 @@ export class GameEngine {
 
     for (let i = 0; i < this.dice.length; i++) {
       const d = this.dice[i];
-      const isLocked = d.state === DiceState.Locked || d.state === DiceState.HeldByPlayer;
-      if (!isLocked) {
+      // Note: we use the passed settledFaces to ensure we match what was rolled/requested
+      const isPreviouslyLocked = d.state === DiceState.Locked || d.state === DiceState.HeldByPlayer;
+      
+      if (!isPreviouslyLocked) {
         d.face = settledFaces[i];
         d.state = DiceState.Active;
 
-        // Arrows are immediate
+        // Arrows are immediate, but stay active to be re-rolled
         if (d.face === DiceFace.Arrow) {
-          d.state = DiceState.Spent;
+          d.state = DiceState.Active; 
           this._giveArrow(this.currentPlayerIdx);
         }
 
@@ -267,7 +299,13 @@ export class GameEngine {
       this._takeDamage(this.currentPlayerIdx, 1);
       this.rollsLeft = 0;
       this._checkWin();
-      if (!this.gameOver && !p.alive) this._nextTurn();
+      if (this.gameOver) return;
+      
+      if (!p.alive) {
+        this._nextTurn();
+      } else {
+        this._beginResolution();
+      }
       return;
     }
 
@@ -327,11 +365,10 @@ export class GameEngine {
     if (this.gameOver) return;
 
     if (this.pendingShots > 0) {
-      // Find next unspent Shoot die
-      const die = this.dice.find(d =>
-        (d.face === DiceFace.Shoot1 || d.face === DiceFace.Shoot2) &&
-        d.state !== DiceState.Spent
-      );
+      // Prioritize Shoot 1 before Shoot 2
+      let die = this.dice.find(d => d.face === DiceFace.Shoot1 && d.state !== DiceState.Spent);
+      if (!die) die = this.dice.find(d => d.face === DiceFace.Shoot2 && d.state !== DiceState.Spent);
+      
       if (die) {
         this.pendingType = die.face;
         return; // wait for target selection
@@ -384,6 +421,7 @@ export class GameEngine {
 
       this.resolutionQueue.push({ target: targetIdx, type: this.pendingType });
       this.pendingShots--;
+      this.swapRange = false; // Reset Jane toggle for next die
 
       if (this.pendingShots <= 0) {
         // Apply all queued shots simultaneously
@@ -491,20 +529,29 @@ export class GameEngine {
       }
 
       case Characters.JaneCalamidade:
-        this.dice.forEach(d => {
-          if (d.state === DiceState.Active || d.state === DiceState.HeldByPlayer) {
-            if (d.face === DiceFace.Shoot1) d.face = DiceFace.Shoot2;
-            else if (d.face === DiceFace.Shoot2) d.face = DiceFace.Shoot1;
-          }
-        });
-        this._log(`🔄 Jane Calamidade inverte Alvo 1 ↔ Alvo 2.`);
+        if (this.phase === Phase.Resolving) {
+          this.swapRange = !this.swapRange;
+          this._log(`🔄 Jane Calamidade ${this.swapRange ? 'ativa' : 'desativa'} conversão de alcance.`);
+        } else {
+          this.dice.forEach(d => {
+            if (d.state === DiceState.Active || d.state === DiceState.HeldByPlayer) {
+              if (d.face === DiceFace.Shoot1) d.face = DiceFace.Shoot2;
+              else if (d.face === DiceFace.Shoot2) d.face = DiceFace.Shoot1;
+            }
+          });
+          this._log(`🔄 Jane Calamidade inverte Alvo 1 ↔ Alvo 2.`);
+        }
         break;
 
       case Characters.KitCarlson: {
-        const gatDie = this.dice.find(d => d.face === DiceFace.Gatling && d.state !== DiceState.Spent);
-        if (gatDie) {
-          this.pendingAction = SpecialAction.KitCarlson;
-          this._log(`🎴 Kit Carlson: Escolha quem perde 1 Flecha.`);
+        // Discard arrow if any available and he has unspent Gatling die
+        const pWithArrows = this.players.filter(x => x.alive && x.arrows > 0);
+        if (pWithArrows.length > 0) {
+          const gatDie = this.dice.find(d => d.face === DiceFace.Gatling && d.state !== DiceState.Spent);
+          if (gatDie) {
+             this.pendingAction = SpecialAction.KitCarlson;
+             this._log(`🎴 Kit Carlson: Escolha quem perde 1 Flecha.`);
+          }
         }
         break;
       }
@@ -552,6 +599,10 @@ export class GameEngine {
     }
     this.arrowsInCenter = 9;
     this._checkWin();
+    // If current player died, transition immediately
+    if (!this.players[this.currentPlayerIdx].alive && !this.gameOver) {
+      this._nextTurn();
+    }
   }
 
   _takeDamage(targetIdx, amount, sourceIdx = -1) {
@@ -573,13 +624,19 @@ export class GameEngine {
     this.damagedThisTick.push(targetIdx);
     this._log(`💥 Jogador ${targetIdx + 1} perde ${amount} HP (${p.health}/${p.maxHealth})`);
 
+    // Bart Cassidy: receives arrow per HP lost (excl Indians/Dynamite)
+    if (p.character === Characters.BartCassidy && amount > 0 && sourceIdx !== -1) {
+       for (let i = 0; i < amount; i++) this._giveArrow(targetIdx);
+       this._log(`🎩 Bart Cassidy recebe ${amount} flecha(s) pelo dano sofrido.`);
+    }
+
     // ElGringo: attacker gains arrows for each HP lost
     if (sourceIdx >= 0 && sourceIdx !== targetIdx && p.character === Characters.ElGringo) {
       for (let i = 0; i < amount; i++) this._giveArrow(sourceIdx);
       this._log(`😤 El Gringo: Jogador ${sourceIdx + 1} pega ${amount} flecha(s) por atirar!`);
     }
 
-    if (p.health <= 0) this._killPlayer(targetIdx);
+    if (p.health <= 0) this._killPlayer(targetIdx, sourceIdx);
   }
 
   _healPlayer(targetIdx, amount) {
@@ -591,13 +648,28 @@ export class GameEngine {
     if (gained > 0) this._log(`💊 Jogador ${targetIdx + 1} cura ${gained} HP (${p.health}/${p.maxHealth})`);
   }
 
-  _killPlayer(playerIdx) {
+  _killPlayer(playerIdx, sourceIdx = -1) {
     const p = this.players[playerIdx];
     if (!p.alive) return;
     p.alive = false;
     this.arrowsInCenter += p.arrows;
     p.arrows = 0;
     this._log(`💀 Jogador ${playerIdx + 1} (${p.character}, ${p.role}) foi eliminado!`);
+
+    // 3-player mode: if target is stolen (killed by someone else), move to Duel Mode
+    if (this.totalPlayers === 3) {
+      const remaining = this.players.filter(x => x.alive);
+      if (remaining.length === 2 && !this.gameOver) {
+         // Check who was supposed to kill whom
+         for (let i = 0; i < this.totalPlayers; i++) {
+           const goal = this.playerObjectives[i];
+           if (goal === playerIdx && i !== sourceIdx) {
+              this._log('⚔️ O Alvo foi roubado! Iniciando DUELO (último sobrevivente vence).');
+              this.duelMode = true;
+           }
+         }
+      }
+    }
 
     // SamOAbutre heals when anyone dies
     for (let i = 0; i < this.totalPlayers; i++) {
@@ -607,11 +679,30 @@ export class GameEngine {
         this._log(`🦅 Sam O Abutre cura 2 HP.`);
       }
     }
+    
+    // Check if player who killed target wins (3-player mode)
+    if (this.totalPlayers === 3 && sourceIdx >= 0 && !this.duelMode) {
+      if (this.playerObjectives[sourceIdx] === playerIdx) {
+        this.gameOver = true;
+        this.winner = this.players[sourceIdx].role;
+        this._log(`🏆 FIM: ${this.winner} completou seu objetivo pessoal!`);
+      }
+    }
   }
 
   // ── Win Conditions ─────────────────────────────────────────────────────────
 
   _checkWin() {
+    if (this.totalPlayers === 3) {
+      const alive = this.players.filter(p => p.alive);
+      if (alive.length === 1 && !this.gameOver) {
+         this.gameOver = true;
+         this.winner = alive[0].role;
+         this._log(`🏆 FIM: ${this.winner} é o último sobrevivente!`);
+      }
+      return;
+    }
+
     let sheriffAlive = false;
     let outlawsAlive = 0;
     let renegadesAlive = 0;
@@ -685,8 +776,14 @@ export class GameEngine {
     if (this.pendingType === DiceFace.Shoot1 || this.pendingType === DiceFace.Shoot2) {
       const aliveCount = this.players.filter(q => q.alive).length;
       // Shoot2 only gets range 2 if ≥ 4 players alive
-      const range = (this.pendingType === DiceFace.Shoot2 && aliveCount >= 4) ? 2 : 1;
+      let range = (this.pendingType === DiceFace.Shoot2 && aliveCount >= 4) ? 2 : 1;
       const isRose = p.character === Characters.RoseDoolan;
+      const isJane = p.character === Characters.JaneCalamidade;
+      
+      // Jane Calamidade resolution-time swap
+      if (isJane && this.swapRange) {
+        range = range === 1 ? 2 : 1;
+      }
 
       for (let i = 0; i < this.totalPlayers; i++) {
         if (!this.players[i].alive || i === this.currentPlayerIdx) continue;
@@ -701,8 +798,12 @@ export class GameEngine {
           if (this.players[cur].alive) ccw++;
         }
         const dist = Math.min(cw, ccw);
-        const maxRange = isRose ? range + 1 : range;
-        if (dist <= maxRange) targets.push(i);
+        
+        // Shoot logic: Shoot 1 = distance 1. Shoot 2 = distance 2 (reverts to 1 if < 4 alive).
+        const targetDist = range;
+        if (dist === targetDist || (isRose && dist === targetDist + 1)) {
+          targets.push(i);
+        }
       }
       return targets;
     }
@@ -734,9 +835,12 @@ export class GameEngine {
       pendingShots:     this.pendingShots,
       pendingBeers:     this.pendingBeers,
       pendingAction:    this.pendingAction,
+      swapRange:        this.swapRange,
       validTargets:     this.getValidTargets(),
       logs:             [...this.logs],
       damagedThisTick:  [...this.damagedThisTick],
+      playerObjectives: { ...this.playerObjectives },
+      duelMode:         this.duelMode,
     };
   }
 
@@ -751,13 +855,17 @@ export class GameEngine {
     this.arrowsInCenter   = state.arrowsInCenter;
     this.dice             = state.dice.map(d => ({ ...d }));
     this.gameOver         = state.gameOver;
-    this.winner           = state.winner;
-    this.phase            = state.phase;
+    // 3-player mode objectives (Personal Target)
+    this.playerObjectives = {}; // i -> target index
+    this.duelMode = false;      // set to true if a target is stolen
     this.pendingType      = state.pendingType;
     this.pendingShots     = state.pendingShots;
     this.pendingBeers     = state.pendingBeers;
     this.pendingAction    = state.pendingAction;
+    this.swapRange        = state.swapRange || false;
     this.logs             = [...(state.logs || [])];
     this.damagedThisTick  = [...(state.damagedThisTick || [])];
+    this.playerObjectives = { ...(state.playerObjectives || {}) };
+    this.duelMode         = state.duelMode || false;
   }
 }

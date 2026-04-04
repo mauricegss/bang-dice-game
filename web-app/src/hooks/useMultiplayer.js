@@ -217,7 +217,7 @@ export function useMultiplayer() {
       return;
     }
 
-    const result = actionFn.apply(engineRef.current, args);
+    const result = actionFn.call(engineRef.current, engineRef.current, ...args);
     const newState = engineRef.current.getState();
     pushState(newState);
     setGameState(newState);

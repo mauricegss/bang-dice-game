@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 
-const MainMenu = ({ onJoin, onCreate, user, loading, error }) => {
+const MainMenu = ({ onJoin, onCreate, onSolo, user, loading, error, initialCode }) => {
   const [name, setName] = useState(user.name || '');
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(initialCode || '');
+
+  // Auto-join if both name and initialCode exist
+  React.useEffect(() => {
+    if (initialCode && user.name && !loading) {
+       onJoin(initialCode, user.name);
+    }
+  }, []);
 
   return (
     <div style={{
@@ -62,10 +69,24 @@ const MainMenu = ({ onJoin, onCreate, user, loading, error }) => {
               transition: 'transform 0.1s',
               opacity: (loading || !name) ? 0.6 : 1,
             }}
-            onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
-            onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
           >
             {loading ? 'CRIANDO...' : '🏛️ CRIAR SALA'}
+          </button>
+
+          <button
+            onClick={() => onSolo(name)}
+            disabled={loading || !name}
+            style={{
+              background: 'rgba(212,160,23,0.1)', color: '#d4a017',
+              border: '1px solid #d4a017', borderRadius: 12, padding: '12px',
+              fontFamily: 'Rye,serif', fontSize: '0.9rem', cursor: 'pointer',
+              transition: 'all 0.2s',
+              opacity: (loading || !name) ? 0.6 : 1,
+            }}
+            onMouseEnter={e => e.target.style.background = 'rgba(212,160,23,0.2)'}
+            onMouseLeave={e => e.target.style.background = 'rgba(212,160,23,0.1)'}
+          >
+            🤖 SOLO DEBUG (BOTS)
           </button>
 
           <div style={{ padding: '0 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -74,28 +95,35 @@ const MainMenu = ({ onJoin, onCreate, user, loading, error }) => {
             <div style={{ flex: 1, height: 1, background: '#3d1c0a' }} />
           </div>
 
-          <div style={{ position: 'relative' }}>
+          <div style={{ 
+            display: 'flex', 
+            background: 'rgba(0,0,0,0.3)', 
+            border: '1px solid #7b3d14', 
+            borderRadius: 12,
+            overflow: 'hidden'
+          }}>
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="CÓDIGO DA SALA"
+              placeholder="CÓDIGO"
               maxLength={6}
               style={{
-                width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid #7b3d14',
-                borderRadius: 12, padding: '14px 16px', color: '#ffecaf',
+                flex: 1, background: 'transparent', border: 'none',
+                padding: '14px 16px', color: '#ffecaf',
                 fontFamily: 'Rye,serif', fontSize: '1.1rem', textAlign: 'center',
-                outline: 'none', letterSpacing: 4,
+                outline: 'none', letterSpacing: 4, minWidth: 0
               }}
             />
             <button
               onClick={() => onJoin(code, name)}
               disabled={loading || !name || code.length < 4}
               style={{
-                position: 'absolute', right: 6, top: 6, bottom: 6, padding: '0 16px',
+                padding: '0 20px',
                 background: 'linear-gradient(135deg,#8b1a1a,#c22a2a)', color: '#fff',
-                border: 'none', borderRadius: 8, cursor: 'pointer',
+                border: 'none', cursor: 'pointer',
                 fontFamily: 'Rye,serif', fontSize: '0.8rem',
                 opacity: (loading || !name || code.length < 4) ? 0.5 : 1,
+                whiteSpace: 'nowrap'
               }}
             >
               ENTRAR
