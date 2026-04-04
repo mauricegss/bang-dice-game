@@ -419,21 +419,15 @@ export class GameEngine {
       const die = this.dice.find(d => d.face === this.pendingType && d.state !== DiceState.Spent);
       if (die) die.state = DiceState.Spent;
 
-      this.resolutionQueue.push({ target: targetIdx, type: this.pendingType });
+      // Apply damage immediately for better UI responsiveness
+      this._takeDamage(targetIdx, 1, this.currentPlayerIdx);
       this.pendingShots--;
       this.swapRange = false; // Reset Jane toggle for next die
 
       if (this.pendingShots <= 0) {
-        // Apply all queued shots simultaneously
-        for (const shot of this.resolutionQueue) {
-          this._takeDamage(shot.target, 1, this.currentPlayerIdx);
-        }
         this.resolutionQueue = [];
-        this._checkWin();
-        if (this.gameOver) return;
+        this._advanceResolution();
       }
-
-      this._advanceResolution();
       return;
     }
 

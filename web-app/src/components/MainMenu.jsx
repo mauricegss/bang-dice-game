@@ -7,7 +7,7 @@ const MainMenu = ({ onJoin, onCreate, onSolo, user, loading, error, initialCode 
   // Auto-join if both name and initialCode exist
   React.useEffect(() => {
     if (initialCode && user.name && !loading) {
-       onJoin(initialCode, user.name);
+      onJoin(initialCode, user.name);
     }
   }, []);
 
@@ -30,8 +30,38 @@ const MainMenu = ({ onJoin, onCreate, onSolo, user, loading, error, initialCode 
         }}>
           BANG!
         </div>
-        <div style={{ fontFamily: 'Rye,serif', fontSize: '1.1rem', color: '#c8904a', letterSpacing: 5, marginBottom: 32 }}>
-          THE DICE GAME
+        <div style={{ fontFamily: 'Rye,serif', fontSize: '1.1rem', color: '#c8904a', letterSpacing: 5, marginBottom: 24 }}>
+          WEB GAME
+        </div>
+
+        {/* Game Selection */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 32 }}>
+          <div style={{
+            flex: 1, padding: '16px 8px', borderRadius: 12,
+            background: 'rgba(212,160,23,0.15)', border: '2px solid #d4a017',
+            cursor: 'pointer', transition: 'all 0.2s',
+            boxShadow: '0 0 15px rgba(212,160,23,0.2)'
+          }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>🎲</div>
+            <div style={{ fontFamily: 'Rye,serif', fontSize: '0.7rem', color: '#f0c842' }}>DICE GAME</div>
+          </div>
+
+          <div style={{
+            flex: 1, padding: '16px 8px', borderRadius: 12,
+            background: 'rgba(255,255,255,0.03)', border: '2px solid #3d1c0a',
+            opacity: 0.5, cursor: 'not-allowed', position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>🎴</div>
+            <div style={{ fontFamily: 'Rye,serif', fontSize: '0.7rem', color: '#7b3d14' }}>CARD GAME</div>
+            <div style={{
+              position: 'absolute', top: 6, right: -15, background: '#7b3d14',
+              color: '#d4a017', fontSize: '0.45rem', padding: '2px 15px',
+              transform: 'rotate(45deg)', fontWeight: 'bold', whiteSpace: 'nowrap'
+            }}>
+              BREVE
+            </div>
+          </div>
         </div>
 
         {/* Name Input */}
@@ -95,10 +125,10 @@ const MainMenu = ({ onJoin, onCreate, onSolo, user, loading, error, initialCode 
             <div style={{ flex: 1, height: 1, background: '#3d1c0a' }} />
           </div>
 
-          <div style={{ 
-            display: 'flex', 
-            background: 'rgba(0,0,0,0.3)', 
-            border: '1px solid #7b3d14', 
+          <div style={{
+            display: 'flex',
+            background: 'rgba(0,0,0,0.3)',
+            border: '1px solid #7b3d14',
             borderRadius: 12,
             overflow: 'hidden'
           }}>
@@ -141,7 +171,7 @@ const MainMenu = ({ onJoin, onCreate, onSolo, user, loading, error, initialCode 
         )}
 
         <div style={{ marginTop: 24, color: '#7b3d14', fontSize: '0.65rem', lineHeight: 1.6 }}>
-          © 2026 Bang! Multiplayer Online • Suporte via Supabase
+          © 2026 Bang! Web Game • Suporte via Supabase
         </div>
       </div>
     </div>

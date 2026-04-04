@@ -130,7 +130,7 @@ const SidePanel = ({ players = [], logs = [], currentPlayerIdx }) => {
 
   return (
     <div style={{
-      position: 'fixed', right: 0, top: 0, bottom: 0, width: 320, zIndex: 30,
+      position: 'fixed', right: 0, top: 0, bottom: 0, width: 380, zIndex: 30,
       background: 'linear-gradient(180deg, rgba(16,6,2,0.98) 0%, rgba(10,4,2,1) 100%)',
       borderLeft: '2px solid #3d1c0a', display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 40px rgba(0,0,0,0.7)',
     }}>
@@ -147,7 +147,7 @@ const SidePanel = ({ players = [], logs = [], currentPlayerIdx }) => {
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
         {tab === 'events' && logs.map((m, i) => (
-          <div key={i} style={{ fontSize: '0.63rem', color: '#c8904a', lineHeight: 1.5, padding: '2px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          <div key={i} style={{ fontSize: '0.78rem', color: '#c8904a', lineHeight: 1.5, padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
             {m}
           </div>
         ))}
@@ -278,10 +278,10 @@ const GameBoard = ({ room, user, gameState, performAction, onExit }) => {
     return () => window.removeEventListener('resize', handle);
   }, []);
 
-  const availW = vp.w - 320; // Side panel
+  const availW = vp.w - 380; // Side panel
   const centerX = availW / 2;
-  const centerY = vp.h * 0.40;
-  const tableR = Math.min(availW * 0.25, vp.h * 0.25, 220);
+  const centerY = vp.h * 0.42;
+  const tableR = Math.min(availW * 0.24, vp.h * 0.24, 210);
   const orbitR = tableR + 105;
 
   // ── Perspective Logic ──────────────────────────────────────────────────────
