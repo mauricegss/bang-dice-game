@@ -11,82 +11,82 @@ export const Roles = {
 };
 
 export const Characters = {
-  BartCassidy:   'BartCassidy',
-  BlackJack:     'BlackJack',
-  PaulRegret:    'PaulRegret',
-  PedroRamirez:  'PedroRamirez',
-  JaneCalamidade:'JaneCalamidade',
-  ElGringo:      'ElGringo',
-  RoseDoolan:    'RoseDoolan',
-  SidKetchum:    'SidKetchum',
-  JesseJones:    'JesseJones',
-  Jourdonnais:   'Jourdonnais',
-  SlabOAssassino:'SlabOAssassino',
+  BartCassidy: 'BartCassidy',
+  BlackJack: 'BlackJack',
+  PaulRegret: 'PaulRegret',
+  PedroRamirez: 'PedroRamirez',
+  JaneCalamidade: 'JaneCalamidade',
+  ElGringo: 'ElGringo',
+  RoseDoolan: 'RoseDoolan',
+  SidKetchum: 'SidKetchum',
+  JesseJones: 'JesseJones',
+  Jourdonnais: 'Jourdonnais',
+  SlabOAssassino: 'SlabOAssassino',
   SuzyLafayette: 'SuzyLafayette',
-  KitCarlson:    'KitCarlson',
-  SamOAbutre:    'SamOAbutre',
-  DukeSortudo:   'DukeSortudo',
-  WillyTheKid:   'WillyTheKid',
+  KitCarlson: 'KitCarlson',
+  SamOAbutre: 'SamOAbutre',
+  DukeSortudo: 'DukeSortudo',
+  WillyTheKid: 'WillyTheKid',
 };
 
 export const DiceFace = {
-  Arrow:    'Arrow',
+  Arrow: 'Arrow',
   Dynamite: 'Dynamite',
-  Shoot1:   'Shoot1',
-  Shoot2:   'Shoot2',
-  Beer:     'Beer',
-  Gatling:  'Gatling',
+  Shoot1: 'Shoot1',
+  Shoot2: 'Shoot2',
+  Beer: 'Beer',
+  Gatling: 'Gatling',
 };
 
 // Used to mark a die as "spent" after it's been resolved
 // so the UI can grey it out correctly
 export const DiceState = {
   Unrolled: 'Unrolled',
-  Active:   'Active',
-  Locked:   'Locked', // Dynamite forced-lock
-  Spent:    'Spent',  // Used by resolution
+  Active: 'Active',
+  Locked: 'Locked', // Dynamite forced-lock
+  Spent: 'Spent',  // Used by resolution
   HeldByPlayer: 'HeldByPlayer', // Voluntarily locked by player
 };
 
 export const SpecialAction = {
-  None:         'None',
-  SidKetchum:   'SidKetchum',
-  KitCarlson:   'KitCarlson',
+  None: 'None',
+  SidKetchum: 'SidKetchum',
+  KitCarlson: 'KitCarlson',
 };
 
 // Phase of the round
 export const Phase = {
-  Rolling:     'Rolling',     // Player is rolling dice
-  Resolving:   'Resolving',   // Player must choose a target (shoot/beer)
+  Rolling: 'Rolling',     // Player is rolling dice
+  Resolving: 'Resolving',   // Player must choose a target (shoot/beer)
   SpecialAbility: 'SpecialAbility', // Waiting for target selection for an ability
-  TurnEnd:     'TurnEnd',     // Gatling / Arrow auto-resolved, next turn pending
+  TurnEnd: 'TurnEnd',     // Gatling / Arrow auto-resolved, next turn pending
 };
 
 // ── Character data ────────────────────────────────────────────────────────────
 export const CharacterBaseHP = {
-  BartCassidy:   8, BlackJack:     8, PaulRegret:    9, PedroRamirez:  8,
-  JaneCalamidade:8, ElGringo:      7, RoseDoolan:    9, SidKetchum:    8,
-  JesseJones:    9, Jourdonnais:   7, SlabOAssassino:8, SuzyLafayette: 8,
-  KitCarlson:    7, SamOAbutre:    9, DukeSortudo:   8, WillyTheKid:   8,
+  BartCassidy: 8, BlackJack: 8, PaulRegret: 9, PedroRamirez: 8,
+  JaneCalamidade: 8, ElGringo: 7, RoseDoolan: 9, SidKetchum: 8,
+  JesseJones: 9, Jourdonnais: 7, SlabOAssassino: 8, SuzyLafayette: 8,
+  KitCarlson: 7, SamOAbutre: 9, DukeSortudo: 8, WillyTheKid: 8,
 };
 
 export const characterAbilities = {
-  BartCassidy:   "Pode trocar 1 HP por 1 Flecha (não funciona com Indígenas ou Dinamite).",
-  BlackJack:     "Pode re-rolar 1 Dinamite por turno (se < 3 Dinamites no total).",
-  PaulRegret:    "Imune à Metralhadora Gatling.",
-  PedroRamirez:  "Ao tomar dano, descarta Flechas iguais ao dano (em vez de perder HP).",
-  JaneCalamidade:"Pode trocar Alvo 1 por Alvo 2 e vice-versa a qualquer momento.",
-  ElGringo:      "Quando perde HP por Tiro, o atirador deve pegar 1 Flecha.",
-  RoseDoolan:    "Seus tiros alcançam 1 posição extra.",
-  SidKetchum:    "No início do turno, pode curar 1 HP em qualquer jogador.",
-  JesseJones:    "Cerveja cura 2 HP se sua vida estiver em 4 ou menos.",
-  Jourdonnais:   "Nunca perde mais de 1 HP no Ataque dos Indígenas.",
-  SlabOAssassino:"Uma vez por turno, usa 1 Cerveja para ganhar 1 Tiro extra.",
+  BartCassidy: "Pode trocar 1 HP por 1 Flecha (não funciona com Indígenas ou Dinamite).",
+  BlackJack: "Pode re-rolar 1 Dinamite por turno (se < 3 Dinamites no total).",
+  PaulRegret: "Imune à Metralhadora Gatling.",
+  PedroRamirez: "Ao tomar dano, descarta Flechas iguais ao dano (em vez de perder HP).",
+  JaneCalamidade: "Pode trocar Alvo 1 por Alvo 2 e vice-versa a qualquer momento.",
+  ElGringo: "Quando perde HP por Tiro, o atirador deve pegar 1 Flecha.",
+  RoseDoolan: "Seus tiros alcançam 1 posição extra.",
+  SidKetchum: "No início do turno, pode curar 1 HP em qualquer jogador.",
+  JesseJones: "Cerveja cura 2 HP se sua vida estiver em 4 ou menos.",
+  Jourdonnais: "Nunca perde mais de 1 HP no Ataque dos Indígenas.",
+  SlabOAssassino: "Uma vez por turno, usa 1 Cerveja para ganhar 1 Tiro extra.",
   SuzyLafayette: "Se não tiver nenhum Tiro ao resolver, ganha 2 HP.",
-  KitCarlson:    "Cada Gatling descarta 1 Flecha de um jogador à escolha.",
-  SamOAbutre:    "Ganha 2 HP sempre que outro jogador morre.",
-  DukeSortudo:   "Pode rolar os dados 4 vezes no total (em vez de 3).",
-  WillyTheKid:   "Metralhadora ativa com apenas 2 Gatlins (em vez de 3).",
+  KitCarlson: "Cada Gatling descarta 1 Flecha de um jogador à escolha.",
+  SamOAbutre: "Ganha 2 HP sempre que outro jogador morre.",
+  DukeSortudo: "Pode rolar os dados 4 vezes no total (em vez de 3).",
+  WillyTheKid: "Metralhadora ativa com apenas 2 Gatlins (em vez de 3).",
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -112,37 +112,39 @@ export class GameEngine {
   _init() {
     this.players = [];
     this.currentPlayerIdx = 0;
-    this.arrowsInCenter   = 9;
+    this.arrowsInCenter = 9;
     this.gameOver = false;
-    this.winner   = null;
-    this.logs     = [];
+    this.winner = null;
+    this.logs = [];
 
     // Round state
-    this.phase         = Phase.Rolling;
-    this.rollsLeft     = 0;
-    this.maxRolls      = 3;
-    this.dice          = Array(5).fill(null).map(() => ({
-      face:  DiceFace.Arrow,
+    this.phase = Phase.Rolling;
+    this.rollsLeft = 0;
+    this.maxRolls = 3;
+    this.dice = Array(5).fill(null).map(() => ({
+      face: DiceFace.Arrow,
       state: DiceState.Unrolled,
     }));
 
     // Resolution queue
-    this.pendingShots      = 0; // how many Shoot actions still need targets
-    this.pendingBeers      = 0; // how many Beer actions still need targets
-    this.pendingType       = null; // DiceFace currently needing target
-    this.resolutionQueue   = []; // indices of dice needing targets, in order
+    this.pendingShots = 0; // how many Shoot actions still need targets
+    this.pendingBeers = 0; // how many Beer actions still need targets
+    this.pendingType = null; // DiceFace currently needing target
+    this.resolutionQueue = []; // indices of dice needing targets, in order
 
     // Special ability gate
-    this.pendingAction        = SpecialAction.None;
-    this.abilityUsedThisTurn  = false;
+    this.pendingAction = SpecialAction.None;
+    this.abilityUsedThisTurn = false;
 
     // Damage flash set (player indices that just took damage, for UI)
     this.damagedThisTick = [];
-    
+    // Queued shot targets (for simultaneous Shoot resolution per official rules)
+    this.pendingShotTargets = [];
+
     // 3-player mode objectives (Personal Target)
-    this.playerObjectives = {}; 
-    this.duelMode         = false;
-    this.swapRange        = false;
+    this.playerObjectives = {};
+    this.duelMode = false;
+    this.swapRange = false;
 
     this._assignRoles();
     this._assignCharacters();
@@ -174,15 +176,15 @@ export class GameEngine {
         this.currentPlayerIdx = i;
       }
     }
-    
+
     // Set 3-player objectives
     if (this.totalPlayers === 3) {
-       const depIdx = this.players.findIndex(p => p.role === Roles.Deputy);
-       const outIdx = this.players.findIndex(p => p.role === Roles.Outlaw);
-       const renIdx = this.players.findIndex(p => p.role === Roles.Renegade);
-       this.playerObjectives[depIdx] = renIdx; // Deputy -> Renegade
-       this.playerObjectives[renIdx] = outIdx; // Renegade -> Outlaw
-       this.playerObjectives[outIdx] = depIdx; // Outlaw -> Deputy
+      const depIdx = this.players.findIndex(p => p.role === Roles.Deputy);
+      const outIdx = this.players.findIndex(p => p.role === Roles.Outlaw);
+      const renIdx = this.players.findIndex(p => p.role === Roles.Renegade);
+      this.playerObjectives[depIdx] = renIdx; // Deputy -> Renegade
+      this.playerObjectives[renIdx] = outIdx; // Renegade -> Outlaw
+      this.playerObjectives[outIdx] = depIdx; // Outlaw -> Deputy
     }
   }
 
@@ -202,17 +204,18 @@ export class GameEngine {
     const p = this.players[this.currentPlayerIdx];
     if (!p.alive) { this._nextTurn(); return; }
 
-    this.maxRolls             = p.character === Characters.DukeSortudo ? 4 : 3;
-    this.rollsLeft            = this.maxRolls;
-    this.phase                = Phase.Rolling;
-    this.pendingShots         = 0;
-    this.pendingBeers         = 0;
-    this.pendingType          = null;
-    this.resolutionQueue      = [];
-    this.pendingAction        = SpecialAction.None;
-    this.abilityUsedThisTurn  = false;
-    this.damagedThisTick      = [];
-    this.swapRange            = false; // Jane Calamidade toggle
+    this.maxRolls = p.character === Characters.DukeSortudo ? 4 : 3;
+    this.rollsLeft = this.maxRolls;
+    this.phase = Phase.Rolling;
+    this.pendingShots = 0;
+    this.pendingBeers = 0;
+    this.pendingType = null;
+    this.resolutionQueue = [];
+    this.pendingAction = SpecialAction.None;
+    this.abilityUsedThisTurn = false;
+    this.damagedThisTick = [];
+    this.pendingShotTargets = []; // queued targets for simultaneous shoot resolve
+    this.swapRange = false; // Jane Calamidade toggle
 
     // Reset all dice
     this.dice = Array(5).fill(null).map(() => ({
@@ -247,7 +250,7 @@ export class GameEngine {
       const d = this.dice[i];
       const isLocked = d.state === DiceState.Locked || d.state === DiceState.HeldByPlayer;
       if (!isLocked) {
-        d.face  = randomFace();
+        d.face = randomFace();
         d.state = DiceState.Active;
       }
       newFaces.push(d.face);
@@ -272,14 +275,14 @@ export class GameEngine {
       const d = this.dice[i];
       // Note: we use the passed settledFaces to ensure we match what was rolled/requested
       const isPreviouslyLocked = d.state === DiceState.Locked || d.state === DiceState.HeldByPlayer;
-      
+
       if (!isPreviouslyLocked) {
         d.face = settledFaces[i];
         d.state = DiceState.Active;
 
         // Arrows are immediate, but stay active to be re-rolled
         if (d.face === DiceFace.Arrow) {
-          d.state = DiceState.Active; 
+          d.state = DiceState.Active;
           this._giveArrow(this.currentPlayerIdx);
         }
 
@@ -295,17 +298,13 @@ export class GameEngine {
     this.rollsLeft--;
 
     if (dynamiteCount >= 3) {
-      this._log('💥 BOOM! 3 Dinamites — Jogador sofre 1 de dano!');
+      this._log('💥 BOOM! 3 Dinamites — Jogador sofre 1 de dano e perde o turno!');
       this._takeDamage(this.currentPlayerIdx, 1);
       this.rollsLeft = 0;
       this._checkWin();
       if (this.gameOver) return;
-      
-      if (!p.alive) {
-        this._nextTurn();
-      } else {
-        this._beginResolution();
-      }
+      // Rule: turn ends immediately after dynamite explosion — no other dice resolved
+      this._nextTurn();
       return;
     }
 
@@ -368,7 +367,7 @@ export class GameEngine {
       // Prioritize Shoot 1 before Shoot 2
       let die = this.dice.find(d => d.face === DiceFace.Shoot1 && d.state !== DiceState.Spent);
       if (!die) die = this.dice.find(d => d.face === DiceFace.Shoot2 && d.state !== DiceState.Spent);
-      
+
       if (die) {
         this.pendingType = die.face;
         return; // wait for target selection
@@ -413,18 +412,20 @@ export class GameEngine {
       return;
     }
 
-    // ── Shoot resolution ───────────────────────────────────────────────────
+    // ── Shoot resolution (targets queued, damage applied simultaneously) ────
     if (this.pendingType === DiceFace.Shoot1 || this.pendingType === DiceFace.Shoot2) {
-      // Mark the die as spent
       const die = this.dice.find(d => d.face === this.pendingType && d.state !== DiceState.Spent);
       if (die) die.state = DiceState.Spent;
 
-      // Apply damage immediately for better UI responsiveness
-      this._takeDamage(targetIdx, 1, this.currentPlayerIdx);
+      // Queue the hit — do NOT apply damage yet (rule: assign all, then resolve)
+      this.pendingShotTargets.push({ targetIdx, sourceIdx: this.currentPlayerIdx });
+      this._log(`📌 Jogador ${targetIdx + 1} marcado para receber 1 dano.`);
       this.pendingShots--;
-      this.swapRange = false; // Reset Jane toggle for next die
+      this.swapRange = false;
 
       if (this.pendingShots <= 0) {
+        // All targets assigned — now apply all damage simultaneously
+        this._applyPendingShots();
         this.resolutionQueue = [];
         this._advanceResolution();
       }
@@ -437,8 +438,8 @@ export class GameEngine {
       const p = this.players[this.currentPlayerIdx];
       // JesseJones: +2 HP on self beer if HP ≤ 4
       if (targetIdx === this.currentPlayerIdx &&
-          p.character === Characters.JesseJones &&
-          p.health <= 4) {
+        p.character === Characters.JesseJones &&
+        p.health <= 4) {
         healAmt = 2;
       }
       this._healPlayer(targetIdx, healAmt);
@@ -455,6 +456,16 @@ export class GameEngine {
   /** Force-end the current player's turn without resolving remaining dice */
   forceContinue() {
     this._advanceResolution();
+  }
+
+  /** Apply all queued shot damage simultaneously (official rule compliance) */
+  _applyPendingShots() {
+    for (const { targetIdx, sourceIdx } of this.pendingShotTargets) {
+      // Player may still be alive at this point even if multiple shots aimed at them
+      this._takeDamage(targetIdx, 1, sourceIdx);
+    }
+    this.pendingShotTargets = [];
+    this._checkWin();
   }
 
   _resolveGatling() {
@@ -514,7 +525,7 @@ export class GameEngine {
         const shootIdx = this.dice.findIndex(d =>
           (d.face === DiceFace.Shoot1 || d.face === DiceFace.Shoot2) && d.state === DiceState.Active);
         if (beerIdx >= 0 && shootIdx >= 0) {
-          this.dice[beerIdx].face  = this.dice[shootIdx].face;
+          this.dice[beerIdx].face = this.dice[shootIdx].face;
           this.dice[beerIdx].state = DiceState.Active;
           this.abilityUsedThisTurn = true;
           this._log(`🔁 Slab O Assassino converte Cerveja em Tiro extra!`);
@@ -543,8 +554,8 @@ export class GameEngine {
         if (pWithArrows.length > 0) {
           const gatDie = this.dice.find(d => d.face === DiceFace.Gatling && d.state !== DiceState.Spent);
           if (gatDie) {
-             this.pendingAction = SpecialAction.KitCarlson;
-             this._log(`🎴 Kit Carlson: Escolha quem perde 1 Flecha.`);
+            this.pendingAction = SpecialAction.KitCarlson;
+            this._log(`🎴 Kit Carlson: Escolha quem perde 1 Flecha.`);
           }
         }
         break;
@@ -620,8 +631,8 @@ export class GameEngine {
 
     // Bart Cassidy: receives arrow per HP lost (excl Indians/Dynamite)
     if (p.character === Characters.BartCassidy && amount > 0 && sourceIdx !== -1) {
-       for (let i = 0; i < amount; i++) this._giveArrow(targetIdx);
-       this._log(`🎩 Bart Cassidy recebe ${amount} flecha(s) pelo dano sofrido.`);
+      for (let i = 0; i < amount; i++) this._giveArrow(targetIdx);
+      this._log(`🎩 Bart Cassidy recebe ${amount} flecha(s) pelo dano sofrido.`);
     }
 
     // ElGringo: attacker gains arrows for each HP lost
@@ -654,26 +665,26 @@ export class GameEngine {
     if (this.totalPlayers === 3) {
       const remaining = this.players.filter(x => x.alive);
       if (remaining.length === 2 && !this.gameOver) {
-         // Check who was supposed to kill whom
-         for (let i = 0; i < this.totalPlayers; i++) {
-           const goal = this.playerObjectives[i];
-           if (goal === playerIdx && i !== sourceIdx) {
-              this._log('⚔️ O Alvo foi roubado! Iniciando DUELO (último sobrevivente vence).');
-              this.duelMode = true;
-           }
-         }
+        // Check who was supposed to kill whom
+        for (let i = 0; i < this.totalPlayers; i++) {
+          const goal = this.playerObjectives[i];
+          if (goal === playerIdx && i !== sourceIdx) {
+            this._log('⚔️ O Alvo foi roubado! Iniciando DUELO (último sobrevivente vence).');
+            this.duelMode = true;
+          }
+        }
       }
     }
 
     // SamOAbutre heals when anyone dies
     for (let i = 0; i < this.totalPlayers; i++) {
       if (i !== playerIdx && this.players[i].alive &&
-          this.players[i].character === Characters.SamOAbutre) {
+        this.players[i].character === Characters.SamOAbutre) {
         this._healPlayer(i, 2);
         this._log(`🦅 Sam O Abutre cura 2 HP.`);
       }
     }
-    
+
     // Check if player who killed target wins (3-player mode)
     if (this.totalPlayers === 3 && sourceIdx >= 0 && !this.duelMode) {
       if (this.playerObjectives[sourceIdx] === playerIdx) {
@@ -690,9 +701,9 @@ export class GameEngine {
     if (this.totalPlayers === 3) {
       const alive = this.players.filter(p => p.alive);
       if (alive.length === 1 && !this.gameOver) {
-         this.gameOver = true;
-         this.winner = alive[0].role;
-         this._log(`🏆 FIM: ${this.winner} é o último sobrevivente!`);
+        this.gameOver = true;
+        this.winner = alive[0].role;
+        this._log(`🏆 FIM: ${this.winner} é o último sobrevivente!`);
       }
       return;
     }
@@ -705,8 +716,8 @@ export class GameEngine {
     for (const p of this.players) {
       if (!p.alive) continue;
       totalAlive++;
-      if (p.role === Roles.Sheriff)  sheriffAlive = true;
-      if (p.role === Roles.Outlaw)   outlawsAlive++;
+      if (p.role === Roles.Sheriff) sheriffAlive = true;
+      if (p.role === Roles.Outlaw) outlawsAlive++;
       if (p.role === Roles.Renegade) renegadesAlive++;
     }
 
@@ -773,7 +784,7 @@ export class GameEngine {
       let range = (this.pendingType === DiceFace.Shoot2 && aliveCount >= 4) ? 2 : 1;
       const isRose = p.character === Characters.RoseDoolan;
       const isJane = p.character === Characters.JaneCalamidade;
-      
+
       // Jane Calamidade resolution-time swap
       if (isJane && this.swapRange) {
         range = range === 1 ? 2 : 1;
@@ -792,7 +803,7 @@ export class GameEngine {
           if (this.players[cur].alive) ccw++;
         }
         const dist = Math.min(cw, ccw);
-        
+
         // Shoot logic: Shoot 1 = distance 1. Shoot 2 = distance 2 (reverts to 1 if < 4 alive).
         const targetDist = range;
         if (dist === targetDist || (isRose && dist === targetDist + 1)) {
@@ -816,50 +827,52 @@ export class GameEngine {
 
   getState() {
     return {
-      players:          this.players.map(p => ({ ...p })),
+      players: this.players.map(p => ({ ...p })),
       currentPlayerIdx: this.currentPlayerIdx,
-      rollsLeft:        this.rollsLeft,
-      maxRolls:         this.maxRolls,
-      arrowsInCenter:   this.arrowsInCenter,
-      dice:             this.dice.map(d => ({ ...d })),
-      gameOver:         this.gameOver,
-      winner:           this.winner,
-      phase:            this.phase,
-      pendingType:      this.pendingType,
-      pendingShots:     this.pendingShots,
-      pendingBeers:     this.pendingBeers,
-      pendingAction:    this.pendingAction,
-      swapRange:        this.swapRange,
-      validTargets:     this.getValidTargets(),
-      logs:             [...this.logs],
-      damagedThisTick:  [...this.damagedThisTick],
+      rollsLeft: this.rollsLeft,
+      maxRolls: this.maxRolls,
+      arrowsInCenter: this.arrowsInCenter,
+      dice: this.dice.map(d => ({ ...d })),
+      gameOver: this.gameOver,
+      winner: this.winner,
+      phase: this.phase,
+      pendingType: this.pendingType,
+      pendingShots: this.pendingShots,
+      pendingBeers: this.pendingBeers,
+      pendingAction: this.pendingAction,
+      swapRange: this.swapRange,
+      validTargets: this.getValidTargets(),
+      pendingShotTargets: [...this.pendingShotTargets],
+      logs: [...this.logs],
+      damagedThisTick: [...this.damagedThisTick],
       playerObjectives: { ...this.playerObjectives },
-      duelMode:         this.duelMode,
+      duelMode: this.duelMode,
     };
   }
 
   /** Restore engine properties from a plain JSON state object */
   hydrate(state) {
     if (!state) return;
-    this.totalPlayers     = state.players.length;
-    this.players          = state.players.map(p => ({ ...p }));
+    this.totalPlayers = state.players.length;
+    this.players = state.players.map(p => ({ ...p }));
     this.currentPlayerIdx = state.currentPlayerIdx;
-    this.rollsLeft        = state.rollsLeft;
-    this.maxRolls         = state.maxRolls;
-    this.arrowsInCenter   = state.arrowsInCenter;
-    this.dice             = state.dice.map(d => ({ ...d }));
-    this.gameOver         = state.gameOver;
+    this.rollsLeft = state.rollsLeft;
+    this.maxRolls = state.maxRolls;
+    this.arrowsInCenter = state.arrowsInCenter;
+    this.dice = state.dice.map(d => ({ ...d }));
+    this.gameOver = state.gameOver;
     // 3-player mode objectives (Personal Target)
     this.playerObjectives = {}; // i -> target index
     this.duelMode = false;      // set to true if a target is stolen
-    this.pendingType      = state.pendingType;
-    this.pendingShots     = state.pendingShots;
-    this.pendingBeers     = state.pendingBeers;
-    this.pendingAction    = state.pendingAction;
-    this.swapRange        = state.swapRange || false;
-    this.logs             = [...(state.logs || [])];
-    this.damagedThisTick  = [...(state.damagedThisTick || [])];
+    this.pendingType = state.pendingType;
+    this.pendingShots = state.pendingShots;
+    this.pendingBeers = state.pendingBeers;
+    this.pendingAction = state.pendingAction;
+    this.swapRange = state.swapRange || false;
+    this.logs = [...(state.logs || [])];
+    this.damagedThisTick = [...(state.damagedThisTick || [])];
+    this.pendingShotTargets = [...(state.pendingShotTargets || [])];
     this.playerObjectives = { ...(state.playerObjectives || {}) };
-    this.duelMode         = state.duelMode || false;
+    this.duelMode = state.duelMode || false;
   }
 }

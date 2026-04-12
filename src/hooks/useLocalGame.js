@@ -9,7 +9,7 @@ export function useLocalGame() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const engineRef = useRef(new GameEngine(3));
+  const engineRef = useRef(new GameEngine(5));
 
   const sync = useCallback(() => {
     setGameState(engineRef.current.getState());
@@ -19,7 +19,7 @@ export function useLocalGame() {
     const userName = name || 'Você';
     setUser(u => ({ ...u, name: userName }));
     
-    // Mock a 3-player lobby immediately starting the game
+    // Mock a 5-player lobby immediately starting the game
     const mockRoom = {
       code: 'DEBUG',
       host_id: 'local-player',
@@ -27,6 +27,8 @@ export function useLocalGame() {
         { id: 'local-player', name: userName },
         { id: 'bot-1', name: '🤖 Cowboy Bot' },
         { id: 'bot-2', name: '🤖 Outlaw Bot' },
+        { id: 'bot-3', name: '🤖 Bandit Bot' },
+        { id: 'bot-4', name: '🤖 Gunslinger Bot' },
       ],
       phase: 'playing',
     };
