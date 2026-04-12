@@ -146,6 +146,16 @@ export class GameEngine {
     this.duelMode = false;
     this.swapRange = false;
 
+    // SlabOAssassino: tracks the duplicated die so both shots force same target
+    this.slabDoubleActive = false;
+    this.slabDuplicateFace = null;
+
+    // KitCarlson: interactive arrow-removal counter (set during _resolveGatling)
+    this.kitArrowsToRemove = 0;
+
+    // Alive count snapshot at start of resolution (to stabilise Shoot2 range)
+    this.aliveAtResolutionStart = null;
+
     this._assignRoles();
     this._assignCharacters();
     this._startTurn();
@@ -298,13 +308,21 @@ export class GameEngine {
     this.rollsLeft--;
 
     if (dynamiteCount >= 3) {
-      this._log('💥 BOOM! 3 Dinamites — Jogador sofre 1 de dano e perde o turno!');
+      this._log('💥 BOOM! 3 Dinamites — Jogador sofre 1 de dano!');
       this._takeDamage(this.currentPlayerIdx, 1);
       this.rollsLeft = 0;
       this._checkWin();
       if (this.gameOver) return;
-      // Rule: turn ends immediately after dynamite explosion — no other dice resolved
-      this._nextTurn();
+
+      if (!p.alive) {
+        // Player eliminated by dynamite — turn passes
+        this._nextTurn();
+      } else {
+        // Rule: 'Resolva normalmente todos os seus outros dados,
+        // a não ser que você seja eliminado pela Dinamite!'
+        // → survivor still resolves remaining dice (shoots, beers, gatling)
+        this._beginResolution();
+      }
       return;
     }
 
@@ -341,6 +359,11 @@ export class GameEngine {
   _beginResolution() {
     if (this.gameOver) return;
     const p = this.players[this.currentPlayerIdx];
+
+    // Snapshot alive count BEFORE any dice effects deal damage.
+    // Arrow/dynamite resolution can kill players, which would wrongly
+    // lower aliveCount and cause Shoot2 to revert to range 1 mid-resolution.
+    this.aliveAtResolutionStart = this.players.filter(q => q.alive).length;
 
     // SuzyLafayette: if 0 shots, gain 2 HP
     const shotCount = this.dice.filter(d =>
@@ -403,30 +426,54 @@ export class GameEngine {
       if (this.players[targetIdx].arrows > 0) {
         this.players[targetIdx].arrows--;
         this.arrowsInCenter++;
-        // Spend the Gatling die that was used
-        const gatDie = this.dice.find(d => d.face === DiceFace.Gatling && d.state !== DiceState.Spent);
-        if (gatDie) gatDie.state = DiceState.Spent;
-        this._log(`🎯 Kit Carlson remove 1 flecha de Jogador ${targetIdx + 1}.`);
+        this.kitArrowsToRemove = Math.max(0, this.kitArrowsToRemove - 1);
+        this._log(`🎯 Kit Carlson remove 1 flecha de Jogador ${targetIdx + 1} (${this.kitArrowsToRemove} restante(s)).`);
       }
-      this.pendingAction = SpecialAction.None;
+      const hasMore = this.kitArrowsToRemove > 0 &&
+        this.players.some(x => x.alive && x.arrows > 0);
+      if (!hasMore) {
+        this.pendingAction = SpecialAction.None;
+        this.kitArrowsToRemove = 0;
+        this._checkWin();
+        if (!this.gameOver) this._nextTurn();
+      }
       return;
     }
 
     // ── Shoot resolution (targets queued, damage applied simultaneously) ────
     if (this.pendingType === DiceFace.Shoot1 || this.pendingType === DiceFace.Shoot2) {
-      const die = this.dice.find(d => d.face === this.pendingType && d.state !== DiceState.Spent);
-      if (die) die.state = DiceState.Spent;
-
-      // Queue the hit — do NOT apply damage yet (rule: assign all, then resolve)
-      this.pendingShotTargets.push({ targetIdx, sourceIdx: this.currentPlayerIdx });
-      this._log(`📌 Jogador ${targetIdx + 1} marcado para receber 1 dano.`);
-      this.pendingShots--;
+      // SlabOAssassino: the duplicated die forces both shots to the SAME target
+      if (this.slabDoubleActive && this.slabDuplicateFace === this.pendingType) {
+        // Spend both dice (the original + the beer-converted duplicate)
+        let spent = 0;
+        for (const d of this.dice) {
+          if (d.face === this.pendingType && d.state !== DiceState.Spent && spent < 2) {
+            d.state = DiceState.Spent;
+            spent++;
+          }
+        }
+        // Push same target twice (2 damage total to one player)
+        this.pendingShotTargets.push({ targetIdx, sourceIdx: this.currentPlayerIdx });
+        this.pendingShotTargets.push({ targetIdx, sourceIdx: this.currentPlayerIdx });
+        this._log(`⚔️ Slab O Assassino: TIRO DUPLO em Jogador ${targetIdx + 1} (2 de dano!)`);
+        this.pendingShots -= 2;
+        this.slabDoubleActive = false;
+        this.slabDuplicateFace = null;
+      } else {
+        // Normal shot
+        const die = this.dice.find(d => d.face === this.pendingType && d.state !== DiceState.Spent);
+        if (die) die.state = DiceState.Spent;
+        this.pendingShotTargets.push({ targetIdx, sourceIdx: this.currentPlayerIdx });
+        this._log(`📌 Jogador ${targetIdx + 1} marcado para receber 1 dano.`);
+        this.pendingShots--;
+      }
       this.swapRange = false;
 
       if (this.pendingShots <= 0) {
-        // All targets assigned — now apply all damage simultaneously
         this._applyPendingShots();
         this.resolutionQueue = [];
+        this._advanceResolution();
+      } else {
         this._advanceResolution();
       }
       return;
@@ -473,24 +520,58 @@ export class GameEngine {
     const requiredGats = p.character === Characters.WillyTheKid ? 2 : 3;
     const gatCount = this.dice.filter(d => d.face === DiceFace.Gatling && d.state !== DiceState.Spent).length;
 
+    // Spend all gatling dice
+    this.dice.forEach(d => { if (d.face === DiceFace.Gatling) d.state = DiceState.Spent; });
+
+    // KitCarlson: per-Gatling-die arrow removal (interactive, no normal gatling unless 3+)
+    if (p.character === Characters.KitCarlson && gatCount > 0) {
+      if (gatCount >= 3) {
+        // Full Gatling damage
+        this._log(`🔫 METRALHADORA GATLING! (Kit Carlson, ${gatCount} Gatlins)`);
+        for (let i = 0; i < this.totalPlayers; i++) {
+          if (i === this.currentPlayerIdx || !this.players[i].alive) continue;
+          if (this.players[i].character === Characters.PaulRegret) {
+            this._log(`😎 Paul Regret ignora a Gatling!`); continue;
+          }
+          this._takeDamage(i, 1, this.currentPlayerIdx);
+        }
+        // Kit discards ALL own arrows automatically
+        const own = p.arrows;
+        this.arrowsInCenter += own; p.arrows = 0;
+        if (own > 0) this._log(`🎴 Kit Carlson descarta ${own} flechas próprias.`);
+        // Then interactive: remove 3 from others
+        this.kitArrowsToRemove = 3;
+      } else {
+        // 1–2 Gatlins: no damage, just interactive arrow removal
+        this.kitArrowsToRemove = gatCount;
+      }
+      const hasArrows = this.players.some(x => x.alive && x.arrows > 0);
+      if (this.kitArrowsToRemove > 0 && hasArrows) {
+        this.pendingAction = SpecialAction.KitCarlson;
+        this._log(`🎴 Kit Carlson: escolha quem perde flecha (${this.kitArrowsToRemove} restante(s)).`);
+        this._checkWin();
+        return; // wait for target selection before _nextTurn
+      }
+      // No arrows available to remove
+      this.kitArrowsToRemove = 0;
+      this._checkWin();
+      if (!this.gameOver) this._nextTurn();
+      return;
+    }
+
+    // Normal Gatling
     if (gatCount >= requiredGats) {
       this._log(`🔫 METRALHADORA GATLING! (${gatCount} Gatlins ≥ ${requiredGats})`);
       for (let i = 0; i < this.totalPlayers; i++) {
-        if (i === this.currentPlayerIdx) continue;
-        if (!this.players[i].alive) continue;
+        if (i === this.currentPlayerIdx || !this.players[i].alive) continue;
         if (this.players[i].character === Characters.PaulRegret) {
-          this._log(`😎 Paul Regret ignora a Gatling!`);
-          continue;
+          this._log(`😎 Paul Regret ignora a Gatling!`); continue;
         }
         this._takeDamage(i, 1, this.currentPlayerIdx);
       }
-      // Shooter discards all arrows
       this.arrowsInCenter += p.arrows;
       p.arrows = 0;
       this._log(`⬆️ Jogador ${p.id + 1} descarta todas as flechas após Gatling.`);
-
-      // Spend all gatling dice
-      this.dice.forEach(d => { if (d.face === DiceFace.Gatling) d.state = DiceState.Spent; });
     }
 
     this._checkWin();
@@ -525,10 +606,13 @@ export class GameEngine {
         const shootIdx = this.dice.findIndex(d =>
           (d.face === DiceFace.Shoot1 || d.face === DiceFace.Shoot2) && d.state === DiceState.Active);
         if (beerIdx >= 0 && shootIdx >= 0) {
-          this.dice[beerIdx].face = this.dice[shootIdx].face;
+          const targetFace = this.dice[shootIdx].face;
+          this.dice[beerIdx].face = targetFace;
           this.dice[beerIdx].state = DiceState.Active;
           this.abilityUsedThisTurn = true;
-          this._log(`🔁 Slab O Assassino converte Cerveja em Tiro extra!`);
+          this.slabDoubleActive = true;
+          this.slabDuplicateFace = targetFace;
+          this._log(`⚔️ Slab O Assassino: Cerveja → Tiro duplo! Ambos os tiros DEVEM atingir o MESMO alvo.`);
         }
         break;
       }
@@ -548,26 +632,8 @@ export class GameEngine {
         }
         break;
 
-      case Characters.KitCarlson: {
-        // Discard arrow if any available and he has unspent Gatling die
-        const pWithArrows = this.players.filter(x => x.alive && x.arrows > 0);
-        if (pWithArrows.length > 0) {
-          const gatDie = this.dice.find(d => d.face === DiceFace.Gatling && d.state !== DiceState.Spent);
-          if (gatDie) {
-            this.pendingAction = SpecialAction.KitCarlson;
-            this._log(`🎴 Kit Carlson: Escolha quem perde 1 Flecha.`);
-          }
-        }
-        break;
-      }
-
-      case Characters.BartCassidy:
-        if (p.health < p.maxHealth && this.arrowsInCenter > 0) {
-          p.health = Math.min(p.health + 1, p.maxHealth);
-          this._giveArrow(this.currentPlayerIdx);
-          this._log(`🔁 Bart Cassidy: +1 HP, +1 Flecha própria.`);
-        }
-        break;
+      // KitCarlson: automatic in _resolveGatling — no active button
+      // BartCassidy: passive in _takeDamage — no active button
 
       default:
         break;
@@ -614,14 +680,32 @@ export class GameEngine {
     const p = this.players[targetIdx];
     if (!p.alive) return;
 
-    // PedroRamirez: lose arrows instead of HP
-    if (p.character === Characters.PedroRamirez && p.arrows > 0) {
-      const used = Math.min(p.arrows, amount);
-      p.arrows -= used;
-      this.arrowsInCenter += used;
-      amount -= used;
-      this._log(`🔶 Pedro Ramirez: descarta ${used} flechas para bloquear ${used} de dano.`);
-      if (amount <= 0) return;
+    // BartCassidy: PASSIVE — convert incoming damage to arrows (from shots/gatling only).
+    // Rule: take 1 arrow INSTEAD of 1 HP per damage point.
+    // Constraint: cannot take the LAST arrow from the center pool.
+    if (p.character === Characters.BartCassidy && amount > 0 && sourceIdx !== -1) {
+      let diverted = 0;
+      while (amount > 0 && this.arrowsInCenter > 1) { // >1 so we never take the last arrow
+        this.arrowsInCenter--;
+        p.arrows++;
+        amount--;
+        diverted++;
+      }
+      if (diverted > 0) {
+        this._log(`🎩 Bart Cassidy: ${diverted} dano convertido em ${diverted} flecha(s)!`);
+        // If amount is now 0, Bart absorbed everything — no HP loss
+        if (amount <= 0) return;
+      }
+    }
+
+    // PedroRamirez: discard arrows equal to damage received.
+    // Rule: he STILL takes the full HP damage — arrows are discarded ON TOP of losing HP.
+    if (p.character === Characters.PedroRamirez && p.arrows > 0 && amount > 0) {
+      const discarded = Math.min(p.arrows, amount);
+      p.arrows -= discarded;
+      this.arrowsInCenter += discarded;
+      this._log(`🔶 Pedro Ramirez: descarta ${discarded} flecha(s) (ainda perde ${amount} HP).`);
+      // amount is NOT reduced: Pedro takes full HP damage
     }
 
     p.health -= amount;
@@ -629,13 +713,7 @@ export class GameEngine {
     this.damagedThisTick.push(targetIdx);
     this._log(`💥 Jogador ${targetIdx + 1} perde ${amount} HP (${p.health}/${p.maxHealth})`);
 
-    // Bart Cassidy: receives arrow per HP lost (excl Indians/Dynamite)
-    if (p.character === Characters.BartCassidy && amount > 0 && sourceIdx !== -1) {
-      for (let i = 0; i < amount; i++) this._giveArrow(targetIdx);
-      this._log(`🎩 Bart Cassidy recebe ${amount} flecha(s) pelo dano sofrido.`);
-    }
-
-    // ElGringo: attacker gains arrows for each HP lost
+    // ElGringo: attacker gains arrows for each HP lost (not from Indians/Dynamite)
     if (sourceIdx >= 0 && sourceIdx !== targetIdx && p.character === Characters.ElGringo) {
       for (let i = 0; i < amount; i++) this._giveArrow(sourceIdx);
       this._log(`😤 El Gringo: Jogador ${sourceIdx + 1} pega ${amount} flecha(s) por atirar!`);
@@ -779,8 +857,9 @@ export class GameEngine {
     }
 
     if (this.pendingType === DiceFace.Shoot1 || this.pendingType === DiceFace.Shoot2) {
-      const aliveCount = this.players.filter(q => q.alive).length;
-      // Shoot2 only gets range 2 if ≥ 4 players alive
+      // Use alive count captured at resolution START (before arrows/dynamite dealt damage).
+      // This prevents a mid-resolution kill from wrongly shrinking Shoot2's range.
+      const aliveCount = this.aliveAtResolutionStart ?? this.players.filter(q => q.alive).length;
       let range = (this.pendingType === DiceFace.Shoot2 && aliveCount >= 4) ? 2 : 1;
       const isRose = p.character === Characters.RoseDoolan;
       const isJane = p.character === Characters.JaneCalamidade;
@@ -847,6 +926,9 @@ export class GameEngine {
       damagedThisTick: [...this.damagedThisTick],
       playerObjectives: { ...this.playerObjectives },
       duelMode: this.duelMode,
+      slabDoubleActive: this.slabDoubleActive,
+      slabDuplicateFace: this.slabDuplicateFace,
+      kitArrowsToRemove: this.kitArrowsToRemove,
     };
   }
 

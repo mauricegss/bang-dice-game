@@ -339,19 +339,8 @@ const GameBoard = ({ room, user, gameState, performAction, onExit }) => {
           && d.some(x => (x.face === DiceFace.Shoot1 || x.face === DiceFace.Shoot2)
             && (x.state === DiceState.Active || x.state === DiceState.HeldByPlayer));
 
-      case 'KitCarlson':
-        // Needs an unspent Gatling die AND some player has arrows
-        return gsData.phase === Phase.Rolling
-          && !gsData.abilityUsedThisTurn
-          && d.some(x => x.face === DiceFace.Gatling && x.state !== DiceState.Spent)
-          && players.some(pl => pl.alive && pl.arrows > 0);
-
-      case 'BartCassidy':
-        // Trade 1 HP for 1 Arrow: must have taken damage AND arrows available in center
-        return gsData.phase === Phase.Rolling
-          && !gsData.abilityUsedThisTurn
-          && p.health < p.maxHealth
-          && gsData.arrowsInCenter > 0;
+      // KitCarlson: passive during _resolveGatling — no button
+      // BartCassidy: passive in _takeDamage — no button
 
       default:
         return false;
